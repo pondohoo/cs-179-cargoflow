@@ -1,4 +1,4 @@
-const loadUnload = (manifest) => {
+const loadUnload = (manifest, containersToLoad, containersToUnload) => {
 	const listOfMoves = [
 		[
 			[6, 2],
