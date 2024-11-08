@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 
-const UploadManifest = ({ setManifest }) => {
+const UploadManifest = ({ setManifest, setShipName }) => {
 	const [uploading, setUploading] = useState(false);
 
 	const readFileContent = (file) => {
@@ -35,7 +35,10 @@ const UploadManifest = ({ setManifest }) => {
 	const handleInput = (e) => {
 		setUploading(true);
 
-		readFileContent(e.target.files[0])
+		const file = e.target.files[0];
+		setShipName(file.name);
+
+		readFileContent(file)
 			.then((content) => {
 				const manifest = formatManifest(content);
 				console.log("manifest is", manifest);

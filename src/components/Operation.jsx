@@ -1,21 +1,36 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Grid from "./Grid"
-import UploadManifest from "./UploadManifest"
+import { useEffect, useState } from "react";
+import Grid from "./Grid";
+import UploadManifest from "./UploadManifest";
 
-const Operation = () => {
-    const [manifest, setManifest] = useState([]);
-        useEffect(() => {
-					console.log(manifest);
-				}, [manifest]);
+import StepHandler from "./StepHandler";
 
-  return (
-    <>
-    <Grid manifest={manifest} />
-    <UploadManifest setManifest={setManifest}/>
-    </>
-  )
-}
+const Operation = ({ operation }) => {
+	const [manifest, setManifest] = useState();
+  if (localStorage.getItem("manifest")) {
+    setManifest(JSON.parse(localStorage.getItem("manifest")));
+  }
+	const [shipName, setShipName] = useState("");
 
-export default Operation
+	useEffect(() => {
+		if (manifest) {
+			localStorage.setItem("manifest", JSON.stringify(manifest));
+		}
+	}, [manifest]);
+	return (
+		<div className="flex flex-col">
+			{shipName && <div>Ship: {shipName.slice(0, -4)}</div>}
+			{!manifest ? (
+				<UploadManifest setShipName={setShipName} setManifest={setManifest} />
+			) : (
+				<>
+					<Grid manifest={manifest} />
+					<StepHandler manifest={manifest} operation={operation} />
+				</>
+			)}
+		</div>
+	);
+};
+
+export default Operation;
