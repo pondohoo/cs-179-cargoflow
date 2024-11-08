@@ -1,7 +1,7 @@
 "use client";
 import GridSquare from "./GridSquare";
 
-const Grid = ({ manifest }) => {
+const Grid = ({ manifest, currentStep }) => {
 	return (
 		<div className="flex justify-center items-center">
 			<div className="flex flex-col-reverse">
@@ -9,7 +9,7 @@ const Grid = ({ manifest }) => {
 					<div key={i} className="flex">
 						{manifest.slice(i * 12, (i + 1) * 12).map((entry, index) => (
 							<div key={index}>
-								<GridSquare entry={entry} />
+								<GridSquare entry={entry} currentStep={currentStep} />
 							</div>
 						))}
 					</div>

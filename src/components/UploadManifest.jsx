@@ -19,9 +19,11 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 			const [rowString, colString, weightString, nameString] = line.split(",");
 
 			const row = parseInt(rowString.trim().slice(1), 10);
-			const col = parseInt(colString.trim().slice(1), 10);
+			const col = parseInt(colString.trim().slice(0,-1), 10);
 			const name = nameString.trim();
 			const weight = parseInt(weightString.trim().slice(1, -1));
+
+			console.log("row", row, "col", col);
 
 			result.push({
 				row,

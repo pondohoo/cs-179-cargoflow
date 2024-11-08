@@ -1,18 +1,18 @@
 "use client";
 import { useState } from "react";
 
-const AdvanceStep = ({ progress }) => {
+const AdvanceStep = ({ start, progress }) => {
 	const [inProgress, setInProgress] = useState(false);
 
-  const start = () => {
+  const handleStart = () => {
     setInProgress(true);
-    progress();
+    start();
   }
 	
 	return (
 		<>
 			{!inProgress ? (
-				<button onClick={start} className="bg-ibm-yellow text-black">
+				<button onClick={handleStart} className="bg-ibm-yellow text-black">
 					Start
 				</button>
 			) : (
