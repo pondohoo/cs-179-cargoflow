@@ -18,6 +18,7 @@ module.exports = {
 					pink: "#dc267f",
 					purple: "#785ef0",
 					blue: "#648fff",
+					gray: "#5b5b5b",
 				},
 			},
 			keyframes: {
