@@ -1,8 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState} from "react";
 import Operation from "./Operation";
 const Selection = () => {
-	const [operation, setOperation] = useState();
+	const [operation, setOperation] = useState(() => {
+		const savedOperation = localStorage.getItem("operation");
+		return savedOperation ? savedOperation : null;
+	});
 
 	const rebalance = (e) => {
 		setOperation("rebalance");
