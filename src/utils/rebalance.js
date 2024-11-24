@@ -40,8 +40,7 @@ const balanceCheck = (manifest) => {
 
 		}
 	}
-	console.log("left:", left);
-	console.log("right:", right);
+	
 
 	//left and right are within 10% of each other
 	let dif = Math.abs((left - right)/((left+right)/2)) * 100; 
@@ -127,7 +126,7 @@ const greedy = (manifest) => {
 			let forced = false;
 			let rightside = findnextrighttop(newManifest);
 			let tempbest = JSON.parse(JSON.stringify(newManifest));
-			let lefttop = findtopbox(manifest);
+			let lefttop = findtopbox(newManifest);
 			for(let i = 0; i<6; i++){
 				let boxnum=lefttop[i];
 				if(boxnum != -1){
@@ -163,7 +162,7 @@ const greedy = (manifest) => {
 			let forced = false;
 			let leftside = findnextlefttop(newManifest);
 			let tempbest = JSON.parse(JSON.stringify(newManifest));
-			let righttop = findtopbox(manifest);
+			let righttop = findtopbox(newManifest);
 			for(let i = 6; i<12; i++){
 				let boxnum=righttop[i];
 				if(boxnum != -1){
