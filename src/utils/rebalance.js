@@ -20,7 +20,7 @@ const rebalance = (manifest) => {
 	// 	],
 	// ]; // move [6, 2] to [1, 2], then [6, 1] to [8, 2], etc.
 	
-	//console.log(greedy(manifest));
+	console.log("starting...");
 	return greedy(manifest);
 };
 
@@ -110,6 +110,64 @@ const findnextlefttop = (manifest) => {
 	}
 	return biggest;
 }
+
+const findCost = (manifest, from, to) => {
+	let frm = [manifest[from].col, manifest[from].row, from];
+	let too =  [manifest[to].col, manifest[to].row, to];
+	let cost = 0;
+	let cur = frm;
+
+	if (frm[0] < too[0]){ //move right
+		while(frm[2] != too[2]){
+			if(frm[0] == too[0]){ //down movement
+				if(frm[1] != too[1]){
+					cur[1] -= 1;
+					cur[2] -= 12;
+					cost++;
+				}
+			}
+			else{
+				if(manifest[cur[2]+1].name == "UNUSED"){ //check if right is empty
+					cur[0]++;
+					cur[2]++;
+					cost++;
+				}
+				else{ // move up
+					cur[1]++;
+					cur[2] += 12;
+					cost++;
+				}
+			}
+		}
+	}
+	else { //move left
+		while(frm[2] != too[2]){
+			if(frm[0] == too[0]){ // down movement
+				if(frm[1] != too[1]){
+					cur[1] -= 1;
+					cur[2] -= 12;
+					cost++;
+				}
+			}
+			else{
+				if(manifest[cur[2]-1].name == "UNUSED"){ // check is left is empty
+					cur[0]--;
+					cur[2]--;
+					cost++;
+				}
+				else{ //move up
+					cur[1]++;
+					cur[2] += 12;
+					cost++;
+				}
+			}
+		}
+	}
+	return cost;
+}
+
+
+
 const greedy = (manifest) => {
 	const listOfMoves = [
 		
@@ -119,10 +177,31 @@ const greedy = (manifest) => {
 		
 	];
 
+	//update to 96 after we get a 9th row
+	let crane = 84; 
+
+	//cost of movemnt
+	let cost = 0; 
+
 	let newManifest = JSON.parse(JSON.stringify(manifest));
 	let bal = balanceCheck(newManifest);
+
+	const map = {}; 
 	while(bal[0] > 10){
-		if(bal[1] == "left"){
+		if(map[bal[0]]){
+			map[bal[0]] += 1;
+			if(map[bal[0]] > 3){
+				console.log("move to sift it no work"); //change to sift after we make it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				break;
+			}
+		}
+		else {
+			map[bal[0]] = 1;
+		}
+
+		
+		
+		if(bal[1] == "left"){ //left heavy
 			let forced = false;
 			let rightside = findnextrighttop(newManifest);
 			let tempbest = JSON.parse(JSON.stringify(newManifest));
@@ -155,10 +234,22 @@ const greedy = (manifest) => {
 					}
 				}
 			}
+
+			//cost to move crane hand to starting box
+			console.log("moving ", crane, " to ", (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1));
+			cost += findCost(tempbest, crane, (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1));
+			crane = (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1);
+			console.log("crane moving", cost);
+
+			//cost to move box
+			console.log("moving ", crane, " to ", (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1));
+			cost += findCost(tempbest, crane, (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1));
+			crane = (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1);
+			console.log("box moving", cost);
 			newManifest = JSON.parse(JSON.stringify(tempbest));
 			listOfMoves.push(curbestmove);
 		}
-		else {
+		else { //right heavy
 			let forced = false;
 			let leftside = findnextlefttop(newManifest);
 			let tempbest = JSON.parse(JSON.stringify(newManifest));
@@ -191,11 +282,24 @@ const greedy = (manifest) => {
 					}
 				}
 			}
+
+			//cost to move crane hand to starting box
+			console.log("moving ", crane, " to ", (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1));
+			cost += findCost(tempbest, crane, (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1));
+			crane = (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1);
+			console.log("crane moving", cost);
+
+			//cost to move box
+			console.log("moving ", crane, " to ", (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1));
+			cost += findCost(tempbest, crane, (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1));
+			crane = (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1);
+			console.log("box moving", cost);
 			newManifest = JSON.parse(JSON.stringify(tempbest));
 			listOfMoves.push(curbestmove);
 		}
 	}
 
+	console.log(cost);
 	return listOfMoves;
 }
 
