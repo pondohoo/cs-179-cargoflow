@@ -6,6 +6,8 @@ import UploadManifest from "./UploadManifest";
 import BufferGrid from "./BufferGrid";
 
 import StepHandler from "./StepHandler";
+import UnloadLoad from "./UnloadLoad";
+import Rebalance from "./Rebalance";
 
 const Operation = ({ operation }) => {
 	const [manifest, setManifest] = useState(() => {
@@ -40,14 +42,24 @@ const Operation = ({ operation }) => {
 			{shipName && <div>Ship: {shipName.slice(0, -4)}</div>}
 			{!manifest ? (
 				<UploadManifest setShipName={setShipName} setManifest={setManifest} />
+			) : operation === "unload" ? (
+				<UnloadLoad
+					manifest={manifest}
+					operation={operation}
+					currentStep={currentStep}
+					optimalSteps={optimalSteps}
+					setOptimalSteps={setOptimalSteps}
+					setCurrentStep={setCurrentStep}
+				/>
 			) : (
-				<div className="flex gap-2">
-					<BufferGrid manifest={manifest} currentStep={currentStep}/>
-					<div className='gap-2 flex-col flex'>
-						<Grid manifest={manifest} currentStep={currentStep} />
-						<StepHandler setManifest={setManifest} manifest={manifest} operation={operation} currentStep={currentStep} optimalSteps={optimalSteps} setOptimalSteps={setOptimalSteps} setCurrentStep={setCurrentStep} />
-					</div>
-				</div>
+				<Rebalance
+					manifest={manifest}
+					operation={operation}
+					currentStep={currentStep}
+					optimalSteps={optimalSteps}
+					setOptimalSteps={setOptimalSteps}
+					setCurrentStep={setCurrentStep}
+				/>
 			)}
 		</div>
 	);
