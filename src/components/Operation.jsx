@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Grid from "./Grid";
 import UploadManifest from "./UploadManifest";
+import BufferGrid from "./BufferGrid";
 
 import StepHandler from "./StepHandler";
 
@@ -40,10 +41,13 @@ const Operation = ({ operation }) => {
 			{!manifest ? (
 				<UploadManifest setShipName={setShipName} setManifest={setManifest} />
 			) : (
-				<>
-					<Grid manifest={manifest} currentStep={currentStep} />
-					<StepHandler setManifest={setManifest} manifest={manifest} operation={operation} currentStep={currentStep} optimalSteps={optimalSteps} setOptimalSteps={setOptimalSteps} setCurrentStep={setCurrentStep} />
-				</>
+				<div className="flex">
+					<BufferGrid currentStep={currentStep}/>
+					<div>
+						<Grid manifest={manifest} currentStep={currentStep} />
+						<StepHandler setManifest={setManifest} manifest={manifest} operation={operation} currentStep={currentStep} optimalSteps={optimalSteps} setOptimalSteps={setOptimalSteps} setCurrentStep={setCurrentStep} />
+					</div>
+				</div>
 			)}
 		</div>
 	);
