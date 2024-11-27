@@ -12,11 +12,11 @@ const AdvanceStep = ({ start, progress }) => {
 	return (
 		<>
 			{!inProgress ? (
-				<button onClick={handleStart} className="bg-ibm-yellow text-black">
+				<button onClick={handleStart} className="bg-ibm-yellow p-2 text-black">
 					Start
 				</button>
 			) : (
-				<button onClick={progress} className="bg-ibm-yellow text-black">
+				<button onClick={progress} className="bg-ibm-yellow p-2 text-black">
 					Progress
 				</button>
 			)}

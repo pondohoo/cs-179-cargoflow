@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Grid from "./Grid";
 import UploadManifest from "./UploadManifest";
-import BufferGrid from "./BufferGrid";
 
 import StepHandler from "./StepHandler";
 import UnloadLoad from "./UnloadLoad";
 import Rebalance from "./Rebalance";
 
 const Operation = ({ operation }) => {
+	console.log("operation", operation);
 	const [manifest, setManifest] = useState(() => {
     const savedManifest = localStorage.getItem("manifest");
     return savedManifest ? JSON.parse(savedManifest) : null
@@ -42,15 +41,18 @@ const Operation = ({ operation }) => {
 			{shipName && <div>Ship: {shipName.slice(0, -4)}</div>}
 			{!manifest ? (
 				<UploadManifest setShipName={setShipName} setManifest={setManifest} />
-			) : operation === "unload" ? (
-				<UnloadLoad
-					manifest={manifest}
-					operation={operation}
-					currentStep={currentStep}
-					optimalSteps={optimalSteps}
-					setOptimalSteps={setOptimalSteps}
-					setCurrentStep={setCurrentStep}
-				/>
+			) : operation === "load/unload" ? (
+				<>
+					{console.log("manifest at operation stage is ", manifest)}
+					<UnloadLoad
+						manifest={manifest}
+						currentStep={currentStep}
+						optimalSteps={optimalSteps}
+						setOptimalSteps={setOptimalSteps}
+						setCurrentStep={setCurrentStep}
+						setManifest={setManifest}
+					/>
+				</>
 			) : (
 				<Rebalance
 					manifest={manifest}
@@ -59,8 +61,18 @@ const Operation = ({ operation }) => {
 					optimalSteps={optimalSteps}
 					setOptimalSteps={setOptimalSteps}
 					setCurrentStep={setCurrentStep}
+					setManifest={setManifest}
 				/>
 			)}
+			{/* <StepHandler
+				setManifest={setManifest}
+				manifest={manifest}
+				operation={operation}
+				currentStep={currentStep}
+				optimalSteps={optimalSteps}
+				setOptimalSteps={setOptimalSteps}
+				setCurrentStep={setCurrentStep}
+			/> */}
 		</div>
 	);
 };
