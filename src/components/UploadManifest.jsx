@@ -33,14 +33,18 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 				name,
 			});
 		});
-		for (let i = 0; i < 12; i++) {
-			result.push({
-				row: 9,
-				col: i + 1,
-				weight: 0,
-				name: "UNUSED",
-			});
+		// Create rows for buffer. 
+		for (let row = 9; row <= 12; row++) {
+			for (let col = 13; col <= 36; col++) {
+				result.push({
+					row,
+					col,
+					weight: 0,
+					name: "UNUSED",
+				});
+			}
 		}
+
 		console.log(result)
 		return result;
 	};
