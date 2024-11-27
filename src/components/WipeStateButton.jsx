@@ -6,7 +6,7 @@ const WipeStateButton = () => {
 	};
 	return (
 		<button
-			className="flex text-black items-center justify-center border-2 border-black bg-white cursor-pointer px-2 py-1 m-0"
+			className="fixed bottom-1  flex text-black items-center justify-center border-2 border-black bg-white cursor-pointer px-2 py-1 m-0"
 			onClick={handleClick}
 		>
 			Wipe current operation
