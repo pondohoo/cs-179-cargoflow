@@ -14,7 +14,7 @@ const Selection = () => {
 	const loadUnload = (e) => {
 		setOperation("load/unload");
 		localStorage.setItem("operation", "load/unload");
-	};
+	}; 
 
 	return (
 		<div>
