@@ -1,8 +1,5 @@
 const GridSquare = ({ entry, currentStep }) => {
 	const getColor = () => {
-		if (entry.row === 9) {
-			return "bg-white opacity-30";
-		}
 		if (currentStep) {
 			if (
 				currentStep[1][0][1] === entry.row &&

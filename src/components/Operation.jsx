@@ -41,9 +41,9 @@ const Operation = ({ operation }) => {
 			{!manifest ? (
 				<UploadManifest setShipName={setShipName} setManifest={setManifest} />
 			) : (
-				<div className="flex">
-					<BufferGrid currentStep={currentStep}/>
-					<div>
+				<div className="flex gap-2">
+					<BufferGrid manifest={manifest} currentStep={currentStep}/>
+					<div className='gap-2 flex-col flex'>
 						<Grid manifest={manifest} currentStep={currentStep} />
 						<StepHandler setManifest={setManifest} manifest={manifest} operation={operation} currentStep={currentStep} optimalSteps={optimalSteps} setOptimalSteps={setOptimalSteps} setCurrentStep={setCurrentStep} />
 					</div>
