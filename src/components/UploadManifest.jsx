@@ -15,11 +15,12 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 	const formatManifest = (content) => {
 		const lines = content.split("\n");
 		const result = [];
+
 		lines.forEach((line) => {
 			const [rowString, colString, weightString, nameString] = line.split(",");
 
 			const row = parseInt(rowString.trim().slice(1), 10);
-			const col = parseInt(colString.trim().slice(0,-1), 10);
+			const col = parseInt(colString.trim().slice(0, -1), 10);
 			const name = nameString.trim();
 			const weight = parseInt(weightString.trim().slice(1, -1));
 
@@ -32,6 +33,19 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 				name,
 			});
 		});
+		// Create rows for buffer. 
+		for (let row = 9; row <= 12; row++) {
+			for (let col = 13; col <= 36; col++) {
+				result.push({
+					row,
+					col,
+					weight: 0,
+					name: "UNUSED",
+				});
+			}
+		}
+
+		console.log(result)
 		return result;
 	};
 	const handleInput = (e) => {
