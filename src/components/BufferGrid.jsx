@@ -1,17 +1,15 @@
 "use client";
 import GridSquare from "./GridSquare";
 
-const BufferGrid = ({ currentStep }) => {
+const BufferGrid = ({ manifest, currentStep }) => {
 	return (
 		<div className="flex justify-center items-center">
 			<div className="flex flex-col-reverse">
 				{Array.from({ length: 4 }).map((_, i) => (
 					<div key={i} className="flex">
-						{Array.from({length: 24}).map((_, index) => (
-							<div key={index}>
-								<GridSquare entry={entry} currentStep={currentStep} />
-							</div>
-                ))}
+						{manifest.slice(96 + i * 24, 96 + (i + 1) * 24).map((entry, j) => {
+							return <GridSquare currentStep={currentStep} key={j} entry={entry} />
+						})}
 					</div>
 				))}
 			</div>
@@ -19,4 +17,4 @@ const BufferGrid = ({ currentStep }) => {
 	);
 };
 
-export default Grid;
+export default BufferGrid;
