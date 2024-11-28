@@ -22,14 +22,14 @@ const StepHandler = ({ manifest, setManifest, operation, optimalSteps, currentSt
 		}
 	};
     const handleManifestUpdate = () => {
-        const currentCol = currentStep[1][0][0];
-        const currentRow = currentStep[1][0][1];
+        const currentCol = currentStep[1][0][1];
+        const currentRow = currentStep[1][0][0];
         const currentEntry = (currentRow - 1) * 12 + (currentCol - 1);
         const currentWeight = manifest[currentEntry].weight;
         const currentName = manifest[currentEntry].name;
         console.log("currentCol", currentCol, "currentRow", currentRow, "entry to update",  "currentWeight", currentWeight, "currentName", currentName);
-        const nextCol = currentStep[1][1][0];
-        const nextRow = currentStep[1][1][1];
+        const nextCol = currentStep[1][1][1];
+        const nextRow = currentStep[1][1][0];
         const nextEntry = (nextRow - 1) * 12 + (nextCol - 1);
         console.log("nextCol", nextCol, "nextRow", nextRow);
         const newManifest = [...manifest];
@@ -40,6 +40,7 @@ const StepHandler = ({ manifest, setManifest, operation, optimalSteps, currentSt
 	const nextStep = () => {
 		if (currentStep[0] === optimalSteps.length - 1 || !currentStep || !optimalSteps) {
 			setCurrentStep(null)
+			return
 		}
         setManifest(handleManifestUpdate);
 		setCurrentStep([currentStep[0] + 1, optimalSteps[currentStep[0] + 1]]);

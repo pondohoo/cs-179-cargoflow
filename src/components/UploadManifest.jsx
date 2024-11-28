@@ -44,6 +44,8 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 				});
 			}
 		}
+		console.log("before slots", result);
+
 		// Create pink slot above ship
 		result.push({
 			row: 13,
@@ -66,7 +68,7 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 			name: "UNUSED",
 		});
 
-		console.log(result);
+		console.log("after slots", result);
 		return result;
 	};
 	const handleInput = (e) => {
