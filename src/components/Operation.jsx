@@ -46,6 +46,7 @@ const Operation = ({ operation }) => {
 					{console.log("manifest at operation stage is ", manifest)}
 					<UnloadLoad
 						manifest={manifest}
+						operation={operation}
 						currentStep={currentStep}
 						optimalSteps={optimalSteps}
 						setOptimalSteps={setOptimalSteps}
