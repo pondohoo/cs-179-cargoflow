@@ -1,22 +1,22 @@
 const loadUnload = (manifest, containersToLoad, containersToUnload) => {
 	const listOfMoves = [
 		[
-			[6, 2],
-			[1, 2],
+			[2, 6],
+			[2, 1],
 		],
 		[
-			[6, 1],
-			[12, 2],
+			[1, 6],
+			[2, 12],
 		],
 		[
-			[5, 2],
-			[11, 2],
+			[2, 5],
+			[2, 11],
 		],
 		[
-			[5, 1],
-			[11, 3],
+			[1, 5],
+			[3, 11],
 		],
-	]; // move [6, 2] to [1, 2], then [6, 1] to [8, 2], etc.
+	]; // move [2, 6] to [2, 1], then [1, 6] to [2, 12], etc.
 	return listOfMoves;
 };
 

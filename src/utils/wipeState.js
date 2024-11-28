@@ -7,6 +7,8 @@ const wipeState = () => {
 	localStorage.removeItem("manifest");
 	localStorage.removeItem("optimalSteps");
 	localStorage.removeItem("currentStep");
+	localStorage.removeItem("containersToLoad");
+	localStorage.removeItem("containersToUnload");
 	console.log("operation wiped");
 };
 

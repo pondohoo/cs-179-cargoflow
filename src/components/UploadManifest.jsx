@@ -33,7 +33,7 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 				name,
 			});
 		});
-		// Create rows for buffer. 
+		// Create rows for buffer.
 		for (let row = 9; row <= 12; row++) {
 			for (let col = 13; col <= 36; col++) {
 				result.push({
@@ -44,8 +44,31 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 				});
 			}
 		}
+		console.log("before slots", result);
 
-		console.log(result)
+		// Create pink slot above ship
+		result.push({
+			row: 13,
+			col: 37,
+			weight: 0,
+			name: "UNUSED",
+		});
+		// Create pink slot above buffer
+		result.push({
+			row: 14,
+			col: 38,
+			weight: 0,
+			name: "UNUSED",
+		});
+		// Create slot for loading truck
+		result.push({
+			row: 15,
+			col: 39,
+			weight: 0,
+			name: "UNUSED",
+		});
+
+		console.log("after slots", result);
 		return result;
 	};
 	const handleInput = (e) => {

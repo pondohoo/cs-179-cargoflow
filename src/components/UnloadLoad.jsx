@@ -4,6 +4,9 @@ import { useEffect, useState } from "react"
 import UnloadLoadPrompt from "./UnloadLoadPrompt"
 import GridDisplay from "./GridDisplay"
 import StepHandler from "./StepHandler"
+import PinkSquareAboveBuffer from "./PinkSquareAboveBuffer"
+import PinkSquareAboveShip from "./PinkSquareAboveShip"
+import LoadingTruck from "./LoadingTruck"
 
 const UnloadLoad = ({manifest, operation, currentStep, setManifest, optimalSteps, setOptimalSteps, setCurrentStep}) => {
   console.log("manifest at unloadload stage is ", manifest)
@@ -33,7 +36,7 @@ const UnloadLoad = ({manifest, operation, currentStep, setManifest, optimalSteps
   return (
 		<div>
 			<div className="flex flex-col">
-			
+				
 				<GridDisplay manifest={manifest} currentStep={currentStep} />
 				containersToLoad: {containersToLoad.join(", ")}
 				<br />
