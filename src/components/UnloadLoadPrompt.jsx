@@ -19,6 +19,18 @@ const UnloadLoadPrompt = ({
 			setMessage("Please enter a container name");
 			return;
 		}
+
+		// Check for non-printable ASCII characters
+		const nonPrintableAscii = /[\x00-\x1F\x7F]/;
+		if (nonPrintableAscii.test(inputText)) {
+			setMessage("Container name contains non-printable characters");
+			return;
+		}
+
+		if (inputText.length > 255) {
+			setMessage("Container name is longer than 255 characters");
+			return;
+		}
 		const containerExists = manifest.some(
 			(container) => container.name === inputText
 		);
