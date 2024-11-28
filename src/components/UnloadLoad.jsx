@@ -1,14 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import UnloadLoadPrompt from "./UnloadLoadPrompt"
 import GridDisplay from "./GridDisplay"
 import StepHandler from "./StepHandler"
 
 const UnloadLoad = ({manifest, operation, currentStep, setManifest, optimalSteps, setOptimalSteps, setCurrentStep}) => {
   console.log("manifest at unloadload stage is ", manifest)
-    const [containersToLoad, setContainersToLoad] = useState([])
-    const [containersToUnload, setContainersToUnload] = useState([])
+	const [containersToLoad, setContainersToLoad] = useState(() => {
+		const savedContainersToLoad = localStorage.getItem("containersToLoad");
+		return savedContainersToLoad ? JSON.parse(savedContainersToLoad) : [];
+	});
+    const [containersToUnload, setContainersToUnload] = useState(() => {
+			const savedContainersToUnload = localStorage.getItem("containersToUnload");
+			return savedContainersToUnload ? JSON.parse(savedContainersToUnload) : [];
+		});
     const [prompting, setPrompting] = useState(() => {
 		if (currentStep === null)
 		{
@@ -16,6 +22,14 @@ const UnloadLoad = ({manifest, operation, currentStep, setManifest, optimalSteps
 		}
 		else return false
 	})
+	useEffect(() => {
+		if (containersToLoad.length > 0) {
+			localStorage.setItem("containersToLoad", JSON.stringify(containersToLoad));
+		}
+		if (containersToUnload.length > 0) {
+			localStorage.setItem("containersToUnload", JSON.stringify(containersToUnload));
+		}
+	}, [containersToLoad, containersToUnload]);
   return (
 		<div>
 			<div className="flex flex-col">
