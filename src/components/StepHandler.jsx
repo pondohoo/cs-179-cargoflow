@@ -50,6 +50,7 @@ const StepHandler = ({ manifest, setManifest, operation, optimalSteps, currentSt
 			optimalSteps={optimalSteps}
 			manifest={manifest}
             start={getMoves}
+			currentStep={currentStep}
 		/>
 	);
 };
