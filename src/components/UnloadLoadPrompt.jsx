@@ -1,14 +1,23 @@
 "use client";
 import { useState } from "react";
 
-const UnloadLoadPrompt = ({ manifest, setPrompting, setContainersToLoad, setContainersToUnload, containersToLoad, containersToUnload }) => {
+const UnloadLoadPrompt = ({
+	manifest,
+	setPrompting,
+	setContainersToLoad,
+	setContainersToUnload,
+	containersToLoad,
+	containersToUnload,
+}) => {
 	const [inputText, setInputText] = useState("");
 	const [message, setMessage] = useState("");
 	const [isUnloadContainer, setIsUnloadContainer] = useState(true); // true-> unload, false->load
 
 	const handleSubmit = (event) => {
 		event.preventDefault();
-		const containerExists = manifest.some(container => container.name === inputText);
+		const containerExists = manifest.some(
+			(container) => container.name === inputText
+		);
 
 		if (isUnloadContainer && !containerExists) {
 			setMessage("Container not found");
@@ -42,42 +51,46 @@ const UnloadLoadPrompt = ({ manifest, setPrompting, setContainersToLoad, setCont
 
 	return (
 		<div>
-			<div className="fixed inset-0 flex items-center justify-center">
+			<div className="absolute top-0 left-0 right-0">
 				<form
-					className="bg-white p-4 rounded shadow-md w-[30rem]"
+					className="bg-white p-4 rounded w-full min-w-screen-lg mx-auto"
 					onSubmit={handleSubmit}
 				>
-					<div className="text-black">Enter container name to {isUnloadContainer ? "unload" : "load"}</div>
+					<div className="text-black">
+						Enter container name to {isUnloadContainer ? "unload" : "load"}
+					</div>
 					<input
 						type="text"
-						placeholder="Enter exact container name.."
+						placeholder="Enter exact container name."
 						className="border border-gray-300 p-2 w-full text-black"
 						value={inputText}
 						onChange={handleChange}
 					/>
-					<div className="justify-between">
+
+					<div className="flex">
 						<button
-							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
+							className="bg-ibm-blue text-white font-bold py-2 px-4 rounded mt-2"
 							type="submit"
 						>
 							Submit container
 						</button>
-						<div className="text-black p-10 h-6">{message}</div>
+
+						<button
+							className="bg-ibm-blue  text-white font-bold py-2 px-4 rounded mt-2"
+							type="button"
+							onClick={handleSwitchUnloadLoad}
+						>
+							{isUnloadContainer ? "Switch to Load" : "Switch to Unload"}
+						</button>
+						<button
+							className="bg-ibm-blue text-white font-bold py-2 px-4 rounded mt-2"
+							type="button"
+							onClick={handleFinish}
+						>
+							Done
+						</button>
+						<div className="text-black self-center">{message}</div>
 					</div>
-					<button
-						className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
-						type="button"
-						onClick={handleSwitchUnloadLoad}
-					>
-						{isUnloadContainer ? "Switch to Load" : "Switch to Unload"}
-					</button>
-					<button
-						className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
-						type="button"
-						onClick={handleFinish}
-					>
-						Done
-					</button>
 				</form>
 			</div>
 		</div>
