@@ -15,6 +15,10 @@ const UnloadLoadPrompt = ({
 
 	const handleSubmit = (event) => {
 		event.preventDefault();
+		if (inputText === "") {
+			setMessage("Please enter a container name");
+			return;
+		}
 		const containerExists = manifest.some(
 			(container) => container.name === inputText
 		);
