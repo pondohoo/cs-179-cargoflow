@@ -9,7 +9,13 @@ const UnloadLoad = ({manifest, operation, currentStep, setManifest, optimalSteps
   console.log("manifest at unloadload stage is ", manifest)
     const [containersToLoad, setContainersToLoad] = useState([])
     const [containersToUnload, setContainersToUnload] = useState([])
-    const [prompting, setPrompting] = useState(true)
+    const [prompting, setPrompting] = useState(() => {
+		if (currentStep === null)
+		{
+			return true
+		}
+		else return false
+	})
   return (
 		<div>
 			<div className="flex flex-col">
