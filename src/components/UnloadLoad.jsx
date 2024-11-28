@@ -62,6 +62,8 @@ const UnloadLoad = ({manifest, operation, currentStep, setManifest, optimalSteps
 						currentStep={currentStep}
 						setCurrentStep={setCurrentStep}
 						setOptimalSteps={setOptimalSteps}
+						containersToLoad={containersToLoad}
+						containersToUnload={containersToUnload}
 					/>
 				)}
 			</div>

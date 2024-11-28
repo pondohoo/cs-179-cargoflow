@@ -65,15 +65,6 @@ const Operation = ({ operation }) => {
 					setManifest={setManifest}
 				/>
 			)}
-			{/* <StepHandler
-				setManifest={setManifest}
-				manifest={manifest}
-				operation={operation}
-				currentStep={currentStep}
-				optimalSteps={optimalSteps}
-				setOptimalSteps={setOptimalSteps}
-				setCurrentStep={setCurrentStep}
-			/> */}
 		</div>
 	);
 };
