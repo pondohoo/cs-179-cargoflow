@@ -170,6 +170,7 @@ const findCost = (manifest, from, to) => {
 
 const greedy = (manifest) => {
 	const listOfMoves = [
+
 		
 	];
 
@@ -300,6 +301,7 @@ const greedy = (manifest) => {
 	}
 
 	console.log(cost);
+
 	return listOfMoves;
 }
 
