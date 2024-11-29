@@ -170,7 +170,6 @@ const findCost = (manifest, from, to) => {
 
 const greedy = (manifest) => {
 	const listOfMoves = [
-
 		
 	];
 
@@ -181,8 +180,16 @@ const greedy = (manifest) => {
 	//update to 96 after we get a 9th row
 	let crane = 84; 
 
-	//cost of movemnt
+	//cost of saved movemnts
 	let cost = 0; 
+
+	//cost of sub-movements
+	let tempcost = 0;
+
+	//crane hand of sub-movements
+	let tempcrane = 84;
+
+	let curcost = 0;
 
 	let newManifest = JSON.parse(JSON.stringify(manifest));
 	let bal = balanceCheck(newManifest);
@@ -210,42 +217,49 @@ const greedy = (manifest) => {
 			for(let i = 0; i<6; i++){
 				let boxnum=lefttop[i];
 				if(boxnum != -1){
+					tempcost = cost;
 					let boxname = newManifest[boxnum].name;
 					let boxweight = newManifest[boxnum].weight;
 					let tempManifest = JSON.parse(JSON.stringify(newManifest));
 					tempManifest[boxnum] = { ...tempManifest[boxnum], name: "UNUSED", weight: 0 };
 					tempManifest[rightside] = { ...tempManifest[rightside], name: boxname, weight: boxweight};
 					let newbal = balanceCheck(tempManifest);
+					tempcost += findCost(tempManifest, crane, boxnum);
+					tempcost += findCost(tempManifest, boxnum, rightside);
 					if(!forced){
 						forced = true;
 						bal = newbal;
 						tempbest = JSON.parse(JSON.stringify(tempManifest));
+						curcost = tempcost;
 						curbestmove = [
-							[(boxnum%12)+1, Math.floor(boxnum/12)+1],
-							[(rightside%12)+1, Math.floor(rightside/12)+1],
+							//flip
+							[Math.floor(boxnum/12)+1,(boxnum%12)+1],
+							[Math.floor(rightside/12)+1, (rightside%12)+1],
 						]
 					}
-					else if(newbal[0] < bal[0]) {
+					else if(newbal[0] <= bal[0] && curcost > tempcost) {
 						bal = newbal;
 						tempbest = JSON.parse(JSON.stringify(tempManifest));
+						curcost = tempcost;
 						curbestmove = [
-							[(boxnum%12)+1, Math.floor(boxnum/12)+1],
-							[(rightside%12)+1, Math.floor(rightside/12)+1],
+							//flip
+							[Math.floor(boxnum/12)+1, (boxnum%12)+1],
+							[Math.floor(rightside/12)+1, (rightside%12)+1],
 						]
 					}
 				}
 			}
 
 			//cost to move crane hand to starting box
-			console.log("moving ", crane, " to ", (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1));
-			cost += findCost(tempbest, crane, (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1));
-			crane = (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1);
+			console.log("moving ", crane, " to ", (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1));
+			cost += findCost(tempbest, crane, (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1));
+			crane = (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1);
 			console.log("crane moving", cost);
 
 			//cost to move box
-			console.log("moving ", crane, " to ", (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1));
-			cost += findCost(tempbest, crane, (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1));
-			crane = (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1);
+			console.log("moving ", crane, " to ", (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1));
+			cost += findCost(tempbest, crane, (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1));
+			crane = (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1);
 			console.log("box moving", cost);
 			newManifest = JSON.parse(JSON.stringify(tempbest));
 			listOfMoves.push(curbestmove);
@@ -258,42 +272,49 @@ const greedy = (manifest) => {
 			for(let i = 6; i<12; i++){
 				let boxnum=righttop[i];
 				if(boxnum != -1){
+					tempcost = cost;
 					let boxname = newManifest[boxnum].name;
 					let boxweight = newManifest[boxnum].weight;
 					let tempManifest = JSON.parse(JSON.stringify(newManifest));
 					tempManifest[boxnum] = { ...tempManifest[boxnum], name: "UNUSED", weight: 0 };
 					tempManifest[leftside] = { ...tempManifest[leftside], name: boxname, weight: boxweight};
 					let newbal = balanceCheck(tempManifest);
+					tempcost += findCost(tempManifest, crane, boxnum);
+					tempcost += findCost(tempManifest, boxnum, leftside);
 					if(!forced){
 						forced = true;
 						bal = newbal;
+						curcost = tempcost;
 						tempbest = JSON.parse(JSON.stringify(tempManifest));
 						curbestmove = [
-							[(boxnum%12)+1, Math.floor(boxnum/12)+1],
-							[(leftside%12)+1, Math.floor(leftside/12)+1],
+							//flip
+							[Math.floor(boxnum/12)+1, (boxnum%12)+1],
+							[Math.floor(leftside/12)+1, (leftside%12)+1],
 						]
 					}
-					else if(newbal[0] < bal[0]) {
+					else if(newbal[0] <= bal[0] && curcost > tempcost) {
 						bal = newbal;
 						tempbest = JSON.parse(JSON.stringify(tempManifest));
+						curcost = tempcost
 						curbestmove = [
-							[(boxnum%12)+1, Math.floor(boxnum/12)+1],
-							[(leftside%12)+1, Math.floor(leftside/12)+1],
+							//flip
+							[Math.floor(boxnum/12)+1, (boxnum%12)+1],
+							[Math.floor(leftside/12)+1, (leftside%12)+1],
 						]
 					}
 				}
 			}
 
 			//cost to move crane hand to starting box
-			console.log("moving ", crane, " to ", (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1));
-			cost += findCost(tempbest, crane, (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1));
-			crane = (curbestmove[0][1] - 1) * 12 + (curbestmove[0][0] - 1);
+			console.log("moving ", crane, " to ", (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1));
+			cost += findCost(tempbest, crane, (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1));
+			crane = (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1);
 			console.log("crane moving", cost);
 
 			//cost to move box
-			console.log("moving ", crane, " to ", (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1));
-			cost += findCost(tempbest, crane, (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1));
-			crane = (curbestmove[1][1] - 1) * 12 + (curbestmove[1][0] - 1);
+			console.log("moving ", crane, " to ", (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1));
+			cost += findCost(tempbest, crane, (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1));
+			crane = (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1);
 			console.log("box moving", cost);
 			newManifest = JSON.parse(JSON.stringify(tempbest));
 			listOfMoves.push(curbestmove);
@@ -301,7 +322,6 @@ const greedy = (manifest) => {
 	}
 
 	console.log(cost);
-
 	return listOfMoves;
 }
 
@@ -310,6 +330,7 @@ const greedybuf = (manifest) => {
 }
 
 const normal = (manifest) => {
+	
 
 }
 
