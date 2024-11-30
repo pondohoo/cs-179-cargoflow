@@ -21,7 +21,7 @@ const rebalance = (manifest) => {
 	// ]; // move [6, 2] to [1, 2], then [6, 1] to [8, 2], etc.
 	
 	console.log("starting...");
-	return greedy(manifest);
+	return normal(manifest);
 };
 
 const balanceCheck = (manifest) => {
@@ -178,7 +178,7 @@ const greedy = (manifest) => {
 	];
 
 	//update to 96 after we get a 9th row
-	let crane = 84; 
+	let crane = 96; 
 
 	//cost of saved movemnts
 	let cost = 0; 
@@ -186,8 +186,6 @@ const greedy = (manifest) => {
 	//cost of sub-movements
 	let tempcost = 0;
 
-	//crane hand of sub-movements
-	let tempcrane = 84;
 
 	let curcost = 0;
 
@@ -322,6 +320,7 @@ const greedy = (manifest) => {
 	}
 
 	console.log(cost);
+	normal(manifest);
 	return listOfMoves;
 }
 
@@ -330,8 +329,85 @@ const greedybuf = (manifest) => {
 }
 
 const normal = (manifest) => {
-	
+	let listOfMoves = [
+		
+	];
+	let open = [[manifest, 0, listOfMoves, 96, 0]];
+	let closed = [];
 
+	while(open.length != 0){
+		open.sort((a,b) => a[1]-b[1]);
+		let parent = open.shift();
+		let box = findtopbox(parent[0]);
+		let empty = findtopempty(parent[0]);
+		let parentbal =  balanceCheck(parent[0]);
+		console.log("cost: ", parent[1], " g: ", parent[4], " bal: ", parentbal[0]);
+		if(parentbal[0] <= 10){
+			return parent[2];
+		}
+
+		for (let i = 0; i < 12; i++){
+			if(box[i] != -1){
+				let initialcost = findCost(parent[0], parent[3], box[i]);
+				for(let j = 0; j <12; j++){
+					if(empty[j] != -1 && j != i){
+						
+						let succost = findCost(parent[0], box[i], empty[j]) + initialcost; 
+						let boxname = parent[0][box[i]].name;
+						let boxweight = parent[0][box[i]].weight;
+						let tempManifest = JSON.parse(JSON.stringify(parent[0]));
+						tempManifest[box[i]] = { ...tempManifest[box[i]], name: "UNUSED", weight: 0 };
+						tempManifest[empty[j]] = { ...tempManifest[empty[j]], name: boxname, weight: boxweight};
+						let tempmoveset = JSON.parse(JSON.stringify(parent[2])); 
+						let tempmove = [
+							[Math.floor(box[i]/12)+1, (box[i]%12)+1],
+							[Math.floor(empty[j]/12)+1, (empty[j]%12)+1],
+						];
+						tempmoveset.push(tempmove);
+						let sucbal = balanceCheck(tempManifest);
+						let g = parent[4] + succost;
+						g = (g-1)/26;
+						let h;
+						if(sucbal[0] - 10 > 0){
+							h = (sucbal[0] - 10);
+						}
+						else{
+							h = 0;
+						}
+						h = (h-0)/200;
+						let suc = [tempManifest, g+h, tempmoveset, empty[j], g];
+						let pushed = false;
+						for(let k = 0; k < open.length; k++){
+							if(open[k][0] === suc[0]){
+								if(open[k][1] > suc[1]){
+									open[k] = suc;
+									pushed = true;
+								}
+								pushed = true;
+								break;
+							}
+						}
+						for(let k = 0; k < closed.length; k++){
+							if(closed[k][0] === suc[0]){
+								if(closed[k][1] > suc[1]){
+									if(!pushed){
+										open.push(suc);
+									}
+									pushed = true;
+								}
+								pushed = true;
+							}
+						}
+						if(!pushed){
+							open.push(suc);
+						}
+
+					}
+				}
+			}
+		}
+		closed.push(parent);
+	}
 }
 
 const normalbuf = (manifest) => {
