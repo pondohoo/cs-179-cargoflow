@@ -1,5 +1,8 @@
+import AdvanceStep from "@/components/AdvanceStep";
 import { list } from "postcss";
 
+// General function to rebalance the manifest:
+// First Run Greedy, if it doesn't work, run SIFT, else if time permits, run Normal
 const rebalance = (manifest) => {
 	// const listOfMoves = [
 	// 	[
@@ -24,6 +27,7 @@ const rebalance = (manifest) => {
 	return normal(manifest);
 };
 
+// Returns the difference in weight between the left and right side of the ship, and which side is heavier
 const balanceCheck = (manifest) => {
 	let left = 0;
 	let right = 0;
@@ -32,28 +36,20 @@ const balanceCheck = (manifest) => {
 	for(let i = 0; i < 96; i++){
 		const temp = manifest[i].weight;
 		total += temp;
-		if((i%12) < 6){
+		if((i%12) < 6){ // Find which side based on column #
 			left += temp;
 		}
 		else {
 			right += temp;
-
 		}
 	}
-	
 
-	//left and right are within 10% of each other
-	let dif = Math.abs((left - right)/((left+right)/2)) * 100; 
-
-	if(left > right){
-		return [dif,"left"];
-	}
-
-	//return the difference
-	return [dif,"right"];
+	// Return the difference
+	let dif = Math.abs((left - right) / ((left + right) / 2)) * 100; 
+	return [dif, left > right ? "left" : "right"];
 }
 
-//finds the highest occupied box per col
+// Finds the highest occupied box per col
 const findtopbox = (manifest) => {
 	let arr = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
 	for(let col = 1; col < 13; col++){
@@ -68,7 +64,7 @@ const findtopbox = (manifest) => {
 	return arr;
 }
 
-//finds the topmost empty slot per col
+// Finds the lowest empty slot per col
 const findtopempty = (manifest) => {
 	let arr = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
 	for(let col = 1; col < 13; col++){
@@ -82,7 +78,7 @@ const findtopempty = (manifest) => {
 	return arr;
 }
 
-//find the next lowest open slot on right side
+// Find the next lowest open slot on right side
 const findnextrighttop = (manifest) => {
 	let arr = findtopempty(manifest);
 	let smallest = 96;
@@ -94,7 +90,7 @@ const findnextrighttop = (manifest) => {
 	return smallest;
 }
 
-//find the next lowest open slot on left side
+// Find the next lowest open slot on left side
 const findnextlefttop = (manifest) => {
 	let arr = findtopempty(manifest);
 	let biggest = 0;
@@ -111,6 +107,7 @@ const findnextlefttop = (manifest) => {
 	return biggest;
 }
 
+// Find the cost of moving a box from one slot to another
 const findCost = (manifest, from, to) => {
 	let frm = [manifest[from].col, manifest[from].row, from];
 	let too =  [manifest[to].col, manifest[to].row, to];
@@ -178,7 +175,7 @@ const greedy = (manifest) => {
 	];
 
 	//update to 96 after we get a 9th row
-	let crane = 96; 
+	let crane = 84; 
 
 	//cost of saved movemnts
 	let cost = 0; 
@@ -205,8 +202,7 @@ const greedy = (manifest) => {
 			map[bal[0]] = 1;
 		}
 
-		
-		
+
 		if(bal[1] == "left"){ //left heavy
 			let forced = false;
 			let rightside = findnextrighttop(newManifest);
@@ -320,7 +316,7 @@ const greedy = (manifest) => {
 	}
 
 	console.log(cost);
-	normal(manifest);
+	// normal(manifest);
 	return listOfMoves;
 }
 
@@ -328,87 +324,71 @@ const greedybuf = (manifest) => {
 
 }
 
-const normal = (manifest) => {
-	let listOfMoves = [
-		
-	];
-	let open = [[manifest, 0, listOfMoves, 96, 0]];
-	let closed = [];
+function generateHash(manifest) {
+    return manifest.map(container => `${container.name},${container.weight}`).join(';');
+}
 
-	while(open.length != 0){
-		open.sort((a,b) => a[1]-b[1]);
-		let parent = open.shift();
-		let box = findtopbox(parent[0]);
-		let empty = findtopempty(parent[0]);
-		let parentbal =  balanceCheck(parent[0]);
-		console.log("cost: ", parent[1], " g: ", parent[4], " bal: ", parentbal[0]);
-		if(parentbal[0] <= 10){
+const normal = (manifest) => {
+	let listOfMoves = [];
+	let openSet = new Map(); // Hash -> [State. f. moves, lastEmpty, g]
+	let closedSet = new Map();
+
+	let initialHash = generateHash(manifest);
+	openSet.set(initialHash, [JSON.parse(JSON.stringify(manifest)), 0, listOfMoves, 84, 0]);
+
+	while (openSet.size > 0) {
+		// Get the state with the lowest f value
+		let [currentHash, parent] = Array.from(openSet.entries()).sort((a, b) => a[1][1] - b[1][1])[0];
+		openSet.delete(currentHash);
+
+		let parentBal = balanceCheck(parent[0]);
+		console.log("cost: ", parent[1], " g: ", parent[4], " bal: ", parentBal[0], " move: ", parent[2][0]);
+		if (parentBal[0] <= 10) {
 			return parent[2];
 		}
 
-		for (let i = 0; i < 12; i++){
-			if(box[i] != -1){
-				let initialcost = findCost(parent[0], parent[3], box[i]);
-				for(let j = 0; j <12; j++){
-					if(empty[j] != -1 && j != i){
+		closedSet.set(currentHash, parent);
+
+		let box = findtopbox(parent[0]);
+		let empty = findtopempty(parent[0]);
+		for (let i = 0; i < 12; i++) {
+			if (box[i] !== -1) {
+				let initialCost = findCost(parent[0], parent[3], box[i]);
+				for (let j = 0; j < 12; j++) {
+					if (empty[j] !== -1 && j !== i) {
+						let sucCost = findCost(parent[0], box[i], empty[j]) + initialCost;
 						
-						let succost = findCost(parent[0], box[i], empty[j]) + initialcost; 
-						let boxname = parent[0][box[i]].name;
-						let boxweight = parent[0][box[i]].weight;
 						let tempManifest = JSON.parse(JSON.stringify(parent[0]));
 						tempManifest[box[i]] = { ...tempManifest[box[i]], name: "UNUSED", weight: 0 };
-						tempManifest[empty[j]] = { ...tempManifest[empty[j]], name: boxname, weight: boxweight};
-						let tempmoveset = JSON.parse(JSON.stringify(parent[2])); 
-						let tempmove = [
+						tempManifest[empty[j]] = { ...tempManifest[empty[j]], name: parent[0][box[i]].name, weight: parent[0][box[i]].weight };
+						
+						let sucBal = balanceCheck(tempManifest);
+						let g = parent[4] + sucCost;
+						// g = (g - 1) / 26;
+						let h = Math.max(0, (sucBal[0] - 10) / 100);
+						let f = g + h;
+
+						let tempMoveset = JSON.parse(JSON.stringify(parent[2]));
+						tempMoveset.push([
 							[Math.floor(box[i]/12)+1, (box[i]%12)+1],
 							[Math.floor(empty[j]/12)+1, (empty[j]%12)+1],
-						];
-						tempmoveset.push(tempmove);
-						let sucbal = balanceCheck(tempManifest);
-						let g = parent[4] + succost;
-						g = (g-1)/26;
-						let h;
-						if(sucbal[0] - 10 > 0){
-							h = (sucbal[0] - 10);
-						}
-						else{
-							h = 0;
-						}
-						h = (h-0)/200;
-						let suc = [tempManifest, g+h, tempmoveset, empty[j], g];
-						let pushed = false;
-						for(let k = 0; k < open.length; k++){
-							if(open[k][0] === suc[0]){
-								if(open[k][1] > suc[1]){
-									open[k] = suc;
-									pushed = true;
-								}
-								pushed = true;
-								break;
-							}
-						}
-						for(let k = 0; k < closed.length; k++){
-							if(closed[k][0] === suc[0]){
-								if(closed[k][1] > suc[1]){
-									if(!pushed){
-										open.push(suc);
-									}
-									pushed = true;
-								}
-								pushed = true;
-							}
-						}
-						if(!pushed){
-							open.push(suc);
-						}
+						]);
 
+						let sucHash = generateHash(tempManifest);
+						if ((!closedSet.has(sucHash) && !openSet.has(sucHash)) // New state
+							|| (openSet.has(sucHash) && openSet.get(sucHash)[1] > f)) { // State is in open set with higher f
+							openSet.set(sucHash, [tempManifest, f, tempMoveset, empty[j], g]);
+						} else if (closedSet.has(sucHash) && closedSet.get(sucHash)[1] > f) {
+							closedSet.set(sucHash, [tempManifest, f, tempMoveset, empty[j], g]);
+							openSet.set(sucHash, [tempManifest, f, tempMoveset, empty[j], g]);
+						}
 					}
 				}
 			}
 		}
-		closed.push(parent);
 	}
-}
+	return null;
+};
 
 const normalbuf = (manifest) => {
 
