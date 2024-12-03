@@ -4,29 +4,27 @@ import { list } from "postcss";
 // General function to rebalance the manifest:
 // First Run Greedy, if it doesn't work, run SIFT, else if time permits, run Normal
 const rebalance = (manifest) => {
-	const listOfMoves = [
-		[
-			[6, 2],
-			[1, 2],
-		],
-		[
-			[6, 1],
-			[12, 2],
-		],
-		[
-			[5, 2],
-			[11, 2],
-		],
-		[
-			[5, 1],
-			[11, 3],
-		],
-	]; // move [6, 2] to [1, 2], then [6, 1] to [8, 2], etc.
+	// const listOfMoves = [
+	// 	[
+	// 		[6, 2],
+	// 		[1, 2],
+	// 	],
+	// 	[
+	// 		[6, 1],
+	// 		[12, 2],
+	// 	],
+	// 	[
+	// 		[5, 2],
+	// 		[11, 2],
+	// 	],
+	// 	[
+	// 		[5, 1],
+	// 		[11, 3],
+	// 	],
+	// ]; // move [6, 2] to [1, 2], then [6, 1] to [8, 2], etc.
 	
 	console.log("starting...");
-	console.log(siftGoalState(manifest));
-	return listOfMoves;
-	//return normal(manifest);
+	return sift(manifest);
 };
 
 // Returns the difference in weight between the left and right side of the ship, and which side is heavier
@@ -339,19 +337,10 @@ const bufempty = (manifest) => {
 	return true;
 }
 
-
-
-
-
-
 const greedy = (manifest) => {
-	const listOfMoves = [
-		
-	];
+	const listOfMoves = [];
 
-	let curbestmove =[
-		
-	];
+	let curbestmove =[];
 
 	//update to 96 after we get a 9th row
 	let crane = 84; 
@@ -513,6 +502,22 @@ const normal = (manifest) => {
 	let openSet = new Map(); // Hash -> [State, f, moves, lastEmpty, g]
 	let closedSet = new Map();
 
+	let numUnused, numNan;
+	let percentFull = 0;
+	for (let i = 0; i < 96; i++) {
+		if (manifest[i].name == "UNUSED") {
+			numUnused++;
+		}
+		if (manifest[i].name == "NAN") {
+			numNan++;
+		}
+	}
+	percentFull = (96 - numUnused - numNan) / (96 - numNan) * 100;
+	let numSteps = 36;
+	if (percentFull < 75) {
+		numSteps = 12;
+	}
+
 	let initialHash = generateHash(manifest);
 	openSet.set(initialHash, [JSON.parse(JSON.stringify(manifest)), 0, listOfMoves, 84, 0]);
 
@@ -531,10 +536,10 @@ const normal = (manifest) => {
 
 		let box = findtopbox(parent[0]);
 		let empty = findtopempty(parent[0]);
-		for (let i = 0; i < 36; i++) {
+		for (let i = 0; i < numSteps; i++) {
 			if (box[i] !== -1) {
 				let initialCost = findCost(parent[0], parent[3], box[i]);
-				for (let j = 0; j < 36; j++) {
+				for (let j = 0; j < numSteps; j++) {
 					if (empty[j] !== -1 && j !== i) {
 						let sucCost = findCost(parent[0], box[i], empty[j]) + initialCost;
 						
@@ -570,8 +575,18 @@ const normal = (manifest) => {
 	return null;
 };
 
-const siftHeuristic = (manifest) => {
-
+const siftHeuristic = (manifest, goalState, emptyManifest) => {
+	let cost = 0;
+	for (let i = 0; i < 96; i++) {
+		if (manifest[i].name != goalState[i].name && manifest[i].weight != goalState[i].weight && manifest[i].name != "UNUSED" && manifest[i].name != "NAN") {
+			for (let j = 0; j < 192; j++) {
+				if (manifest[i].name == goalState[j].name && manifest[i].weight == goalState[j].weight) {
+					cost += findCost(emptyManifest, i, j);
+				}
+			}
+		}
+	}
+	return cost;
 }
 
 const findLowestRow = (manifest) => {
@@ -607,8 +622,7 @@ const siftGoalState = (manifest) => {
 		}
 	}
 	// want highest col with the lowest row
-	console.log(findLowestRow(nanManifest));//[1,2,3,4,5,6, | 7,8,9,10,11,12]
-	for (let i = 0; i < left.length; i++) {// [2,1,1,1,1,1, | 1,1,1,1, 1, 2]
+	for (let i = 0; i < left.length; i++) {
 		let lowestRow = findLowestRow(nanManifest);
 		let lowestLeftRow = 8;
 		let highestLeftCol = 1;
@@ -620,13 +634,12 @@ const siftGoalState = (manifest) => {
 				}
 			}
 		}
-		console.log("lowestRow: ", lowestRow, " lowestLeftRow: ", lowestLeftRow, " highestLeftCol: ", highestLeftCol);
 		lowestRow[highestLeftCol - 1] += 1;
 		let boxnum = (lowestLeftRow - 1) * 12 + highestLeftCol - 1;
 		nanManifest[boxnum] = { ...nanManifest[boxnum], name: left[i].name, weight: left[i].weight };
 	}
-	for (let i = 0; i < right.length; i++) {// [3,2,1,1,1,1, | 7,8,9,10,11,12]
-		let lowestRow = findLowestRow(nanManifest);		    // 1,1,1,1,2,3
+	for (let i = 0; i < right.length; i++) {
+		let lowestRow = findLowestRow(nanManifest);
 		let lowestRightRow = 8;
 		let lowestRightCol = 7;
 		for (let j = 6; j < 12; j++) {
@@ -637,7 +650,6 @@ const siftGoalState = (manifest) => {
 				}
 			}
 		}
-		console.log("lowestRow: ", lowestRow, " lowestRightRow: ", lowestRightRow, " lowestRightCol: ", lowestRightCol);
 		lowestRow[lowestRightCol - 1] += 1;
 		let boxnum = (lowestRightRow - 1) * 12 + lowestRightCol - 1;
 		nanManifest[boxnum] = { ...nanManifest[boxnum], name: right[i].name, weight: right[i].weight };
@@ -649,7 +661,28 @@ const sift = (manifest) => {
 	let listOfMoves = [];
 	let openSet = new Map(); // Hash -> [State, f, moves, lastEmpty, g]
 	let closedSet = new Map();
+	let numUnused, numNan;
+	let percentFull = 0;
+	let emptyManifest = JSON.parse(JSON.stringify(manifest));
+	for (let i = 0; i < 96; i++) {
+		if (manifest[i].name == "UNUSED") {
+			numUnused++;
+		}
+		if (manifest[i].name == "NAN") {
+			numNan++;
+		}
+		if (manifest[i].name != "UNUSED" && manifest[i].name != "NAN") {
+			emptyManifest[i] = { ...emptyManifest[i], name: "UNUSED", weight: 0 };
+		}
+	}
+	percentFull = (96 - numUnused - numNan) / (96 - numNan) * 100;
+	let numSteps = 36;
+	if (percentFull < 75) {
+		numSteps = 12;
+	}
 
+	let goalState = siftGoalState(manifest);
+	console.log("goalState: ", goalState);
 	let initialHash = generateHash(manifest);
 	openSet.set(initialHash, [JSON.parse(JSON.stringify(manifest)), 0, listOfMoves, 84, 0]);
 
@@ -658,9 +691,9 @@ const sift = (manifest) => {
 		let [currentHash, parent] = Array.from(openSet.entries()).sort((a, b) => a[1][1] - b[1][1])[0];
 		openSet.delete(currentHash);
 
-		let parentBal = balanceCheck(parent[0]);
-		console.log("cost: ", parent[1], " g: ", parent[4], " bal: ", parentBal[0], " move: ", parent[2][0]);
-		if (parentBal[0] <= 10 && bufempty(parent[0])) {
+		let siftBalanced = siftHeuristic(parent[0], goalState, emptyManifest);
+		console.log("cost: ", parent[1], " g: ", parent[4], " h: ", siftBalanced, " move: ", parent[2][0]);
+		if (siftBalanced == 0 && bufempty(parent[0])) {
 			return parent[2];
 		}
 
@@ -668,10 +701,10 @@ const sift = (manifest) => {
 
 		let box = findtopbox(parent[0]);
 		let empty = findtopempty(parent[0]);
-		for (let i = 0; i < 36; i++) {
+		for (let i = 0; i < numSteps; i++) {
 			if (box[i] !== -1) {
 				let initialCost = findCost(parent[0], parent[3], box[i]);
-				for (let j = 0; j < 36; j++) {
+				for (let j = 0; j < numSteps; j++) {
 					if (empty[j] !== -1 && j !== i) {
 						let sucCost = findCost(parent[0], box[i], empty[j]) + initialCost;
 						
@@ -681,8 +714,7 @@ const sift = (manifest) => {
 						
 						let sucBal = balanceCheck(tempManifest);
 						let g = parent[4] + sucCost;
-						// g = (g - 1) / 26;
-						let h = Math.max(0, (sucBal[0] - 10) / 100);
+						let h = siftHeuristic(tempManifest, goalState, emptyManifest);
 						let f = g + h;
 
 						let tempMoveset = JSON.parse(JSON.stringify(parent[2]));
