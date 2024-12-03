@@ -4,27 +4,29 @@ import { list } from "postcss";
 // General function to rebalance the manifest:
 // First Run Greedy, if it doesn't work, run SIFT, else if time permits, run Normal
 const rebalance = (manifest) => {
-	// const listOfMoves = [
-	// 	[
-	// 		[6, 2],
-	// 		[1, 2],
-	// 	],
-	// 	[
-	// 		[6, 1],
-	// 		[12, 2],
-	// 	],
-	// 	[
-	// 		[5, 2],
-	// 		[11, 2],
-	// 	],
-	// 	[
-	// 		[5, 1],
-	// 		[11, 3],
-	// 	],
-	// ]; // move [6, 2] to [1, 2], then [6, 1] to [8, 2], etc.
+	const listOfMoves = [
+		[
+			[6, 2],
+			[1, 2],
+		],
+		[
+			[6, 1],
+			[12, 2],
+		],
+		[
+			[5, 2],
+			[11, 2],
+		],
+		[
+			[5, 1],
+			[11, 3],
+		],
+	]; // move [6, 2] to [1, 2], then [6, 1] to [8, 2], etc.
 	
 	console.log("starting...");
-	return normal(manifest);
+	console.log(siftGoalState(manifest));
+	return listOfMoves;
+	//return normal(manifest);
 };
 
 // Returns the difference in weight between the left and right side of the ship, and which side is heavier
@@ -506,6 +508,7 @@ function generateHash(manifest) {
 }
 
 const normal = (manifest) => {
+	let temp = siftGoalState(manifest);
 	let listOfMoves = [];
 	let openSet = new Map(); // Hash -> [State, f, moves, lastEmpty, g]
 	let closedSet = new Map();
@@ -567,8 +570,79 @@ const normal = (manifest) => {
 	return null;
 };
 
-const normalbuf = (manifest) => {
+const siftHeuristic = (manifest) => {
 
+}
+
+const findLowestRow = (manifest) => {
+	let lowestRow = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
+	for(let col = 1; col < 13; col++){
+		for(let row = 8; row > 0; row--){
+			const boxnum = (row - 1) * 12 + (col - 1);
+			if(manifest[boxnum].name == "UNUSED" ){
+				lowestRow[col-1]=row; 
+			}
+		}
+	}
+	return lowestRow;
+}
+
+const siftGoalState = (manifest) => {
+	let list = [];
+	let nanManifest = JSON.parse(JSON.stringify(manifest));
+	for (let i = 0; i < 96; i++) {
+		if (manifest[i].name != "UNUSED" && manifest[i].name != "NAN") {
+			list.push(manifest[i]);
+			nanManifest[i] = { ...nanManifest[i], name: "UNUSED", weight: 0 };
+		}
+	}
+	list.sort((a, b) => b.weight - a.weight);
+	let left = [];
+	let right = [];
+	for (let i = 0; i < list.length; i++) {
+		if (i % 2 === 0) {
+			left.push(list[i]); // heaviest -> lighter
+		} else {
+			right.push(list[i]);
+		}
+	}
+	// want highest col with the lowest row
+	console.log(findLowestRow(nanManifest));//[1,2,3,4,5,6, | 7,8,9,10,11,12]
+	for (let i = 0; i < left.length; i++) {// [2,1,1,1,1,1, | 1,1,1,1, 1, 2]
+		let lowestRow = findLowestRow(nanManifest);
+		let lowestLeftRow = 8;
+		let highestLeftCol = 1;
+		for (let j = 0; j < 6; j++) {
+			if (lowestRow[j] !== -1 && lowestRow[j] <= lowestLeftRow) {
+				lowestLeftRow = lowestRow[j];
+				if(j + 1 > highestLeftCol){
+					highestLeftCol = j + 1;
+				}
+			}
+		}
+		console.log("lowestRow: ", lowestRow, " lowestLeftRow: ", lowestLeftRow, " highestLeftCol: ", highestLeftCol);
+		lowestRow[highestLeftCol - 1] += 1;
+		let boxnum = (lowestLeftRow - 1) * 12 + highestLeftCol - 1;
+		nanManifest[boxnum] = { ...nanManifest[boxnum], name: left[i].name, weight: left[i].weight };
+	}
+	for (let i = 0; i < right.length; i++) {// [3,2,1,1,1,1, | 7,8,9,10,11,12]
+		let lowestRow = findLowestRow(nanManifest);		    // 1,1,1,1,2,3
+		let lowestRightRow = 8;
+		let lowestRightCol = 7;
+		for (let j = 6; j < 12; j++) {
+			if (lowestRow[j] !== -1 && lowestRow[j] < lowestRightRow) {
+				lowestRightRow = lowestRow[j];
+				if(j + 1 > lowestRightCol){
+					lowestRightCol = j + 1;
+				}
+			}
+		}
+		console.log("lowestRow: ", lowestRow, " lowestRightRow: ", lowestRightRow, " lowestRightCol: ", lowestRightCol);
+		lowestRow[lowestRightCol - 1] += 1;
+		let boxnum = (lowestRightRow - 1) * 12 + lowestRightCol - 1;
+		nanManifest[boxnum] = { ...nanManifest[boxnum], name: right[i].name, weight: right[i].weight };
+	}
+	return nanManifest;
 }
 
 const sift = (manifest) => {
