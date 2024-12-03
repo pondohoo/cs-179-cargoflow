@@ -520,7 +520,7 @@ const normal = (manifest) => {
 
 		let parentBal = balanceCheck(parent[0]);
 		console.log("cost: ", parent[1], " g: ", parent[4], " bal: ", parentBal[0], " move: ", parent[2][0]);
-		if (parentBal[0] <= 10) {
+		if (parentBal[0] <= 10 && bufempty(parent[0])) {
 			return parent[2];
 		}
 
@@ -528,10 +528,10 @@ const normal = (manifest) => {
 
 		let box = findtopbox(parent[0]);
 		let empty = findtopempty(parent[0]);
-		for (let i = 0; i < 12; i++) {
+		for (let i = 0; i < 36; i++) {
 			if (box[i] !== -1) {
 				let initialCost = findCost(parent[0], parent[3], box[i]);
-				for (let j = 0; j < 12; j++) {
+				for (let j = 0; j < 36; j++) {
 					if (empty[j] !== -1 && j !== i) {
 						let sucCost = findCost(parent[0], box[i], empty[j]) + initialCost;
 						
@@ -547,8 +547,8 @@ const normal = (manifest) => {
 
 						let tempMoveset = JSON.parse(JSON.stringify(parent[2]));
 						tempMoveset.push([
-							[Math.floor(box[i]/12)+1, (box[i]%12)+1],
-							[Math.floor(empty[j]/12)+1, (empty[j]%12)+1],
+							[tempManifest[box[i]].row, tempManifest[box[i]].col],
+							[tempManifest[empty[j]].row, tempManifest[empty[j]].col],
 						]);
 
 						let sucHash = generateHash(tempManifest);
