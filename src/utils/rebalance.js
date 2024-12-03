@@ -572,6 +572,65 @@ const normalbuf = (manifest) => {
 }
 
 const sift = (manifest) => {
+	let listOfMoves = [];
+	let openSet = new Map(); // Hash -> [State, f, moves, lastEmpty, g]
+	let closedSet = new Map();
+
+	let initialHash = generateHash(manifest);
+	openSet.set(initialHash, [JSON.parse(JSON.stringify(manifest)), 0, listOfMoves, 84, 0]);
+
+	while (openSet.size > 0) {
+		// Get the state with the lowest f value
+		let [currentHash, parent] = Array.from(openSet.entries()).sort((a, b) => a[1][1] - b[1][1])[0];
+		openSet.delete(currentHash);
+
+		let parentBal = balanceCheck(parent[0]);
+		console.log("cost: ", parent[1], " g: ", parent[4], " bal: ", parentBal[0], " move: ", parent[2][0]);
+		if (parentBal[0] <= 10 && bufempty(parent[0])) {
+			return parent[2];
+		}
+
+		closedSet.set(currentHash, parent);
+
+		let box = findtopbox(parent[0]);
+		let empty = findtopempty(parent[0]);
+		for (let i = 0; i < 36; i++) {
+			if (box[i] !== -1) {
+				let initialCost = findCost(parent[0], parent[3], box[i]);
+				for (let j = 0; j < 36; j++) {
+					if (empty[j] !== -1 && j !== i) {
+						let sucCost = findCost(parent[0], box[i], empty[j]) + initialCost;
+						
+						let tempManifest = JSON.parse(JSON.stringify(parent[0]));
+						tempManifest[box[i]] = { ...tempManifest[box[i]], name: "UNUSED", weight: 0 };
+						tempManifest[empty[j]] = { ...tempManifest[empty[j]], name: parent[0][box[i]].name, weight: parent[0][box[i]].weight };
+						
+						let sucBal = balanceCheck(tempManifest);
+						let g = parent[4] + sucCost;
+						// g = (g - 1) / 26;
+						let h = Math.max(0, (sucBal[0] - 10) / 100);
+						let f = g + h;
+
+						let tempMoveset = JSON.parse(JSON.stringify(parent[2]));
+						tempMoveset.push([
+							[tempManifest[box[i]].row, tempManifest[box[i]].col],
+							[tempManifest[empty[j]].row, tempManifest[empty[j]].col],
+						]);
+
+						let sucHash = generateHash(tempManifest);
+						if ((!closedSet.has(sucHash) && !openSet.has(sucHash)) // New state
+							|| (openSet.has(sucHash) && openSet.get(sucHash)[1] > f)) { // State is in open set with higher f
+							openSet.set(sucHash, [tempManifest, f, tempMoveset, empty[j], g]);
+						} else if (closedSet.has(sucHash) && closedSet.get(sucHash)[1] > f) {
+							closedSet.set(sucHash, [tempManifest, f, tempMoveset, empty[j], g]);
+							openSet.set(sucHash, [tempManifest, f, tempMoveset, empty[j], g]);
+						}
+					}
+				}
+			}
+		}
+	}
+	return null;
 
 }
 
