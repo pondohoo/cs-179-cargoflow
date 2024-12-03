@@ -51,12 +51,21 @@ const balanceCheck = (manifest) => {
 
 // Finds the highest occupied box per col
 const findtopbox = (manifest) => {
-	let arr = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
+	let arr = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
 	for(let col = 1; col < 13; col++){
 		for(let row = 8; row > 0; row--){
 			const boxnum = (row - 1) * 12 + (col - 1);
-			if(manifest[boxnum].weight > 0){
+			if(manifest[boxnum].name != "UNUSED" && manifest[boxnum].name != "NAN"){
 				arr[col-1]=boxnum;
+				break;
+			}
+		}
+	}
+	for(let col = 1; col < 25; col++){
+		for(let row = 4; row > 0; row--){
+			const boxnum = (row - 1) * 24 + (col - 1) + 96;
+			if(manifest[boxnum].name != "UNUSED" && manifest[boxnum].name != "NAN"){
+				arr[col+11]=boxnum;
 				break;
 			}
 		}
@@ -66,12 +75,20 @@ const findtopbox = (manifest) => {
 
 // Finds the lowest empty slot per col
 const findtopempty = (manifest) => {
-	let arr = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
+	let arr = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
 	for(let col = 1; col < 13; col++){
 		for(let row = 8; row > 0; row--){
 			const boxnum = (row - 1) * 12 + (col - 1);
-			if(manifest[boxnum].name != "NAN" && manifest[boxnum].weight == 0){
+			if(manifest[boxnum].name == "UNUSED" ){
 				arr[col-1]=boxnum;
+			}
+		}
+	}
+	for(let col = 1; col < 25; col++){
+		for(let row = 4; row > 0; row--){
+			const boxnum = (row - 1) * 24 + (col - 1) + 96;
+			if(manifest[boxnum].name == "UNUSED" ){
+				arr[col+11]=boxnum;
 			}
 		}
 	}
@@ -79,6 +96,7 @@ const findtopempty = (manifest) => {
 }
 
 // Find the next lowest open slot on right side
+//for greedy
 const findnextrighttop = (manifest) => {
 	let arr = findtopempty(manifest);
 	let smallest = 96;
@@ -91,6 +109,7 @@ const findnextrighttop = (manifest) => {
 }
 
 // Find the next lowest open slot on left side
+//for greedy
 const findnextlefttop = (manifest) => {
 	let arr = findtopempty(manifest);
 	let biggest = 0;
@@ -109,59 +128,217 @@ const findnextlefttop = (manifest) => {
 
 // Find the cost of moving a box from one slot to another
 const findCost = (manifest, from, to) => {
+	//col, row, boxnum
 	let frm = [manifest[from].col, manifest[from].row, from];
 	let too =  [manifest[to].col, manifest[to].row, to];
 	let cost = 0;
 	let cur = frm;
 
-	if (frm[0] < too[0]){ //move right
-		while(frm[2] != too[2]){
-			if(frm[0] == too[0]){ //down movement
-				if(frm[1] != too[1]){
-					cur[1] -= 1;
-					cur[2] -= 12;
-					cost++;
-				}
+	//ship to buf
+	if(from < 96 && to > 95){
+		//shift to top left of ship
+		cost = 9 - frm[1];
+		cost += frm[0] - 1;
+		cost += 4;
+		cur = [36,13,215];
+
+		//shift to position
+		while(cur[2] != too[2]){
+			if(cur[0] != too[0]){
+				cur[0]--;
+				cur[2]--;
+				cost++;
 			}
 			else{
-				if(manifest[cur[2]+1].name == "UNUSED"){ //check if right is empty
-					cur[0]++;
-					cur[2]++;
-					cost++;
+				cur[1]--;
+				cur[2] -= 24;
+				cost++;
+			}
+		}
+
+	}
+	//buf to ship
+	else if (from > 95 && to < 96){
+		//shift to top right of buf
+		cost = 5 - frm[1];
+		cost += 36 - frm[0];
+		cost += 4;
+		cur = [1, 9, 96];
+
+		//shift to position
+		while(cur[2] != too[2]){
+			if(cur[0] != too[0]){
+				cur[0]++;
+				cur[2]++;
+				cost++;
+			}
+			else{
+				cur[1]--;
+				cur[2] -= 12;
+				cost++;
+			}
+		}
+	}
+	//buf to buf
+	else if (from > 95 && to > 95){
+		if (frm[0] < too[0]){ //move right
+			while(frm[2] != too[2]){
+				if(frm[0] == too[0]){ //down movement
+					if(frm[1] != too[1]){
+						cur[1] -= 1;
+						cur[2] -= 24;
+						cost++;
+					}
 				}
-				else{ // move up
-					cur[1]++;
-					cur[2] += 12;
-					cost++;
+				else{
+					if(manifest[cur[2]+1].name == "UNUSED"){ //check if right is empty
+						cur[0]++;
+						cur[2]++;
+						cost++;
+					}
+					else{ // move up
+						cur[1]++;
+						cur[2] += 24;
+						cost++;
+						while(cur[2] > 191){
+							if(cur[0] != too[0]){
+								cost++;
+								cur[0]++;
+								cur[2]++;
+							}
+							else{
+								cost++;
+								cur[1]--;
+								cur[2]-=24;
+							}
+						}
+					}
+				}
+			}
+		}
+		else { //move left
+			while(frm[2] != too[2]){
+				if(frm[0] == too[0]){ // down movement
+					if(frm[1] != too[1]){
+						cur[1] -= 1;
+						cur[2] -= 24;
+						cost++;
+					}
+				}
+				else{
+					if(manifest[cur[2]-1].name == "UNUSED"){ // check is left is empty
+						cur[0]--;
+						cur[2]--;
+						cost++;
+					}
+					else{ //move up
+						cur[1]++;
+						cur[2] += 24;
+						cost++;
+						while(cur[2] > 191){
+							if(cur[0] != too[0]){
+								cost++;
+								cur[0]--;
+								cur[2]--;
+							}
+							else{
+								cost++;
+								cur[1]--;
+								cur[2]-=24;
+							}
+						}
+					}
 				}
 			}
 		}
 	}
-	else { //move left
-		while(frm[2] != too[2]){
-			if(frm[0] == too[0]){ // down movement
-				if(frm[1] != too[1]){
-					cur[1] -= 1;
-					cur[2] -= 12;
-					cost++;
+	//ship to ship
+	else {
+		if (frm[0] < too[0]){ //move right
+			while(frm[2] != too[2]){
+				if(frm[0] == too[0]){ //down movement
+					if(frm[1] != too[1]){
+						cur[1] -= 1;
+						cur[2] -= 12;
+						cost++;
+					}
+				}
+				else{
+					if(manifest[cur[2]+1].name == "UNUSED"){ //check if right is empty
+						cur[0]++;
+						cur[2]++;
+						cost++;
+					}
+					else{ // move up
+						cur[1]++;
+						cur[2] += 12;
+						cost++;
+						while(cur[2] > 95){
+							if(cur[0] != too[0]){
+								cost++;
+								cur[0]++;
+								cur[2]++;
+							}
+							else{
+								cost++;
+								cur[1]--;
+								cur[2]-=12;
+							}
+						}
+					}
 				}
 			}
-			else{
-				if(manifest[cur[2]-1].name == "UNUSED"){ // check is left is empty
-					cur[0]--;
-					cur[2]--;
-					cost++;
+		}
+		else { //move left
+			while(frm[2] != too[2]){
+				if(frm[0] == too[0]){ // down movement
+					if(frm[1] != too[1]){
+						cur[1] -= 1;
+						cur[2] -= 12;
+						cost++;
+					}
 				}
-				else{ //move up
-					cur[1]++;
-					cur[2] += 12;
-					cost++;
+				else{
+					if(manifest[cur[2]-1].name == "UNUSED"){ // check is left is empty
+						cur[0]--;
+						cur[2]--;
+						cost++;
+					}
+					else{ //move up
+						cur[1]++;
+						cur[2] += 12;
+						cost++;
+						while(cur[2] > 95){
+							if(cur[0] != too[0]){
+								cost++;
+								cur[0]--;
+								cur[2]--;
+							}
+							else{
+								cost++;
+								cur[1]--;
+								cur[2]-=12;
+							}
+						}
+					}
 				}
 			}
 		}
 	}
 	return cost;
 }
+
+const bufempty = (manifest) => {
+	for (let i = 96; i < 192; i++){
+		if(manifest[i].name != "UNUSED"){
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
 
 
 
@@ -330,7 +507,7 @@ function generateHash(manifest) {
 
 const normal = (manifest) => {
 	let listOfMoves = [];
-	let openSet = new Map(); // Hash -> [State. f. moves, lastEmpty, g]
+	let openSet = new Map(); // Hash -> [State, f, moves, lastEmpty, g]
 	let closedSet = new Map();
 
 	let initialHash = generateHash(manifest);
