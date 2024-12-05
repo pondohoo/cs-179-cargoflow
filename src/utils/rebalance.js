@@ -22,20 +22,36 @@ const rebalance = (manifest) => {
 	// 		[11, 3],
 	// 	],
 	// ]; // move [6, 2] to [1, 2], then [6, 1] to [8, 2], etc.
-	
-	console.log("starting...");
-	return solveProblem(manifest);
+	return solveProblem(manifest)
+		.then((result) => {
+			console.log("Result: ", result);
+			return result;
+		})
+		.catch((error) => {
+			console.error(error);
+			throw error;
+		});
 };
 
 async function solveProblem(manifest) {
-	const timeLimit = 15 * 60 * 1000; // 15 minutes
+	const totalTimeLimit = 15 * 60 * 1000; // 15 minutes
+
+	const start = performance.now();
 	const greedySolution = greedy(manifest);
+	const greedyTime = performance.now() - start;
+
+	const remainingTime = totalTimeLimit - greedyTime;
+
+	if (remainingTime <= 0) {
+		console.warn("No time left after running greedy. Returning greedy solution.");
+		return greedySolution[0];
+	}
 
 	if (greedySolution[1] == "normal") {
 		try {
 			const result = await Promise.race([
 				normal(manifest),
-				new Promise((_, reject) => setTimeout(() => reject("Time limit exceeded"), timeLimit))
+				new Promise((_, reject) => setTimeout(() => reject("Time limit exceeded"), remainingTime))
 			]);
 			return result;
 		} catch (error) {
@@ -46,7 +62,7 @@ async function solveProblem(manifest) {
 		try {
 			const result = await Promise.race([
 				sift(manifest),
-				new Promise((_, reject) => setTimeout(() => reject("Time limit exceeded"), timeLimit))
+				new Promise((_, reject) => setTimeout(() => reject("Time limit exceeded"), remainingTime))
 			]);
 			return result;
 		} catch (error) {
@@ -514,7 +530,7 @@ const greedy = (manifest) => {
 
 	console.log(cost);
 	// normal(manifest);
-	return listOfMoves, "normal";
+	return [listOfMoves, "normal"];
 }
 
 const greedySift = (manifest) => {
@@ -526,7 +542,6 @@ function generateHash(manifest) {
 }
 
 const normal = (manifest) => {
-	let temp = siftGoalState(manifest);
 	let listOfMoves = [];
 	let openSet = new Map(); // Hash -> [State, f, moves, lastEmpty, g]
 	let closedSet = new Map();
