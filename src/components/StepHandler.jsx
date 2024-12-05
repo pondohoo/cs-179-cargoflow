@@ -15,20 +15,15 @@ const StepHandler = ({
 	setCurrentStep,
 	setOptimalSteps,
 }) => {
-	const getMoves = async() => {
+	const getMoves = () => {
 		if (manifest === null) {
 			throw new Error("No manifest found");
 		}
 		if (operation === "rebalance") {
-			try {
-				// Await the promise returned by rebalance
-				const generatedOptimalSteps = await rebalance(manifest);
-				setOptimalSteps(generatedOptimalSteps);
-				setCurrentStep([0, generatedOptimalSteps[0]]);
-				console.log("optimalSteps", generatedOptimalSteps); // This will now log the resolved value
-			} catch (error) {
-				console.error("Error in getMoves:", error);
-			}
+			const generatedOptimalSteps = rebalance(manifest);
+			setOptimalSteps(generatedOptimalSteps);
+			setCurrentStep([0, generatedOptimalSteps[0]]);
+			console.log("optimalSteps", generatedOptimalSteps);
 		} else {
 			const generatedOptimalSteps = loadUnload(manifest,containersToLoad,containersToUnload);
 			setOptimalSteps(generatedOptimalSteps);

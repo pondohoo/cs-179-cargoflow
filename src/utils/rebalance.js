@@ -1,58 +1,13 @@
 import AdvanceStep from "@/components/AdvanceStep";
 import { list } from "postcss";
 
+
 // General function to rebalance the manifest:
 // First Run Greedy, if it doesn't work, run SIFT, else if time permits, run Normal
 const rebalance = (manifest) => {
-	return solveProblem(manifest)
-		.then((result) => {
-			console.log("Result: ", result);
-			return result;
-		})
-		.catch((error) => {
-			console.error(error);
-			throw error;
-		});
+	return greedy(manifest);
 };
 
-async function solveProblem(manifest) {
-	const totalTimeLimit = 15 * 60 * 1000; // 15 minutes
-
-	const start = performance.now();
-	const greedySolution = greedy(manifest);
-	const greedyTime = performance.now() - start;
-
-	const remainingTime = totalTimeLimit - greedyTime;
-
-	if (remainingTime <= 0) {
-		console.warn("No time left after running greedy. Returning greedy solution.");
-		return greedySolution[0];
-	}
-
-	if (greedySolution[1] == "normal") {
-		try {
-			const result = await Promise.race([
-				normal(manifest),
-				new Promise((_, reject) => setTimeout(() => reject("Time limit exceeded"), remainingTime))
-			]);
-			return result;
-		} catch (error) {
-			console.warn(error);
-			return greedySolution[0];
-		}
-	} else {
-		try {
-			const result = await Promise.race([
-				sift(manifest),
-				new Promise((_, reject) => setTimeout(() => reject("Time limit exceeded"), remainingTime))
-			]);
-			return result;
-		} catch (error) {
-			console.warn(error);
-			return greedySolution[0];
-		}
-	}
-}
 
 // Returns the difference in weight between the left and right side of the ship, and which side is heavier
 const balanceCheck = (manifest) => {
@@ -365,6 +320,9 @@ const bufempty = (manifest) => {
 }
 
 const greedy = (manifest) => {
+	const start = performance.now();
+	const totalTimeLimit = 0.5 * 60 * 1000; // 15 minutes
+
 	const listOfMoves = [];
 
 	let curbestmove =[];
@@ -389,8 +347,18 @@ const greedy = (manifest) => {
 		if(map[bal[0]]){
 			map[bal[0]] += 1;
 			if(map[bal[0]] > 3){
+				const greedyTime = performance.now() - start;
+				const remainingTime = totalTimeLimit - greedyTime;
+				if (remainingTime <= 0) {
+					console.warn("No time left after running greedy. Returning greedy solution.");
+					return listOfMoves;
+				}
 				console.log("move to sift it no work"); //change to sift after we make it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				break;
+				let result = normal(manifest, remainingTime);
+				if(result != null){
+					return result;
+				}
+				return listOfMoves;
 			}
 		}
 		else {
@@ -511,8 +479,22 @@ const greedy = (manifest) => {
 	}
 
 	console.log(cost);
-	// normal(manifest);
-	return [listOfMoves, "normal"];
+	const greedyTime = performance.now() - start;
+
+	const remainingTime = totalTimeLimit - greedyTime;
+
+	if (remainingTime <= 0) {
+		console.warn("No time left after running greedy. Returning greedy solution.");
+		return listOfMoves;
+	}
+
+	let result = normal(manifest, remainingTime);
+	console.log("result:", result);
+	if(result != null){
+		console.log("correct resturn result:", result);
+		return result;
+	}
+	return listOfMoves;
 }
 
 const greedySift = (manifest) => {
@@ -523,7 +505,9 @@ function generateHash(manifest) {
     return manifest.map(container => `${container.name},${container.weight}`).join(';');
 }
 
-const normal = (manifest) => {
+const normal = (manifest, remainingTime) => {
+	const startTime = performance.now();
+
 	let listOfMoves = [];
 	let openSet = new Map(); // Hash -> [State, f, moves, lastEmpty, g]
 	let closedSet = new Map();
@@ -548,6 +532,11 @@ const normal = (manifest) => {
 	openSet.set(initialHash, [JSON.parse(JSON.stringify(manifest)), 0, listOfMoves, 84, 0]);
 
 	while (openSet.size > 0) {
+		let elapsedTime = performance.now() - startTime;
+		if (elapsedTime > remainingTime) { // 
+			console.log("Time limit exceededddddddddddddddddddddddddddd.");
+			return null; // Exit the function if time is exceeded
+		}
 		// Get the state with the lowest f value
 		let [currentHash, parent] = Array.from(openSet.entries()).sort((a, b) => a[1][1] - b[1][1])[0];
 		openSet.delete(currentHash);
