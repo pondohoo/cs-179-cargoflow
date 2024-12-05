@@ -24,8 +24,37 @@ const rebalance = (manifest) => {
 	// ]; // move [6, 2] to [1, 2], then [6, 1] to [8, 2], etc.
 	
 	console.log("starting...");
-	return sift(manifest);
+	return solveProblem(manifest);
 };
+
+async function solveProblem(manifest) {
+	const timeLimit = 15 * 60 * 1000; // 15 minutes
+	const greedySolution = greedy(manifest);
+
+	if (greedySolution[1] == "normal") {
+		try {
+			const result = await Promise.race([
+				normal(manifest),
+				new Promise((_, reject) => setTimeout(() => reject("Time limit exceeded"), timeLimit))
+			]);
+			return result;
+		} catch (error) {
+			console.warn(error);
+			return greedySolution[0];
+		}
+	} else {
+		try {
+			const result = await Promise.race([
+				sift(manifest),
+				new Promise((_, reject) => setTimeout(() => reject("Time limit exceeded"), timeLimit))
+			]);
+			return result;
+		} catch (error) {
+			console.warn(error);
+			return greedySolution[0];
+		}
+	}
+}
 
 // Returns the difference in weight between the left and right side of the ship, and which side is heavier
 const balanceCheck = (manifest) => {
@@ -485,10 +514,10 @@ const greedy = (manifest) => {
 
 	console.log(cost);
 	// normal(manifest);
-	return listOfMoves;
+	return listOfMoves, "normal";
 }
 
-const greedybuf = (manifest) => {
+const greedySift = (manifest) => {
 
 }
 
