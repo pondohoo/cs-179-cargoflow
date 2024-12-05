@@ -5,7 +5,7 @@ import { list } from "postcss";
 // General function to rebalance the manifest:
 // First Run Greedy, if it doesn't work, run SIFT, else if time permits, run Normal
 const rebalance = (manifest) => {
-	return greedy(manifest);
+	return sift(manifest);
 };
 
 
@@ -114,84 +114,83 @@ const findCost = (manifest, from, to) => {
 	let frm = [manifest[from].col, manifest[from].row, from];
 	let too =  [manifest[to].col, manifest[to].row, to];
 	let cost = 0;
-	let cur = frm;
 
 	//ship to buf
-	if(from < 96 && to > 95){
+	if (from < 96 && to > 95) {
 		//shift to top left of ship
 		cost = 9 - frm[1];
 		cost += frm[0] - 1;
 		cost += 4;
-		cur = [36,13,215];
+		frm = [36,13,215];
 
 		//shift to position
-		while(cur[2] != too[2]){
-			if(cur[0] != too[0]){
-				cur[0]--;
-				cur[2]--;
+		while(frm[2] != too[2]){
+			if(frm[0] != too[0]){
+				frm[0]--;
+				frm[2]--;
 				cost++;
 			}
 			else{
-				cur[1]--;
-				cur[2] -= 24;
+				frm[1]--;
+				frm[2] -= 24;
 				cost++;
 			}
 		}
 
 	}
 	//buf to ship
-	else if (from > 95 && to < 96){
+	else if (from > 95 && to < 96) {
 		//shift to top right of buf
 		cost = 5 - frm[1];
 		cost += 36 - frm[0];
 		cost += 4;
-		cur = [1, 9, 96];
+		frm = [1, 9, 96];
 
 		//shift to position
-		while(cur[2] != too[2]){
-			if(cur[0] != too[0]){
-				cur[0]++;
-				cur[2]++;
+		while(frm[2] != too[2]){
+			if(frm[0] != too[0]){
+				frm[0]++;
+				frm[2]++;
 				cost++;
 			}
 			else{
-				cur[1]--;
-				cur[2] -= 12;
+				frm[1]--;
+				frm[2] -= 12;
 				cost++;
 			}
 		}
 	}
 	//buf to buf
-	else if (from > 95 && to > 95){
+	else if (from > 95 && to > 95) {
 		if (frm[0] < too[0]){ //move right
 			while(frm[2] != too[2]){
 				if(frm[0] == too[0]){ //down movement
 					if(frm[1] != too[1]){
-						cur[1] -= 1;
-						cur[2] -= 24;
+						frm[1] -= 1;
+						frm[2] -= 24;
 						cost++;
 					}
 				}
 				else{
-					if(manifest[cur[2]+1].name == "UNUSED"){ //check if right is empty
-						cur[0]++;
-						cur[2]++;
+					if(manifest[frm[2]+1].name == "UNUSED"){ //check if right is empty
+						frm[0]++;
+						frm[2]++;
 						cost++;
 					}
 					else{ // move up
-						cur[1]++;
-						cur[2] += 24;
+						frm[1]++;
+						frm[2] += 24;
 						cost++;
-						while(cur[2] > 191){
-							if(cur[0] != too[0]){
+						while(frm[2] > 191){
+							if(frm[0] != too[0]){
 								cost++;
-								cur[0]++;
-								cur[2]++;
+								frm[0]++;
+								frm[2]++;
 							}
 							else{
 								cost++;
-								cur[1]--;
-								cur[2]-=24;
+								frm[1]--;
+								frm[2]-=24;
 							}
 						}
 					}
@@ -202,31 +201,31 @@ const findCost = (manifest, from, to) => {
 			while(frm[2] != too[2]){
 				if(frm[0] == too[0]){ // down movement
 					if(frm[1] != too[1]){
-						cur[1] -= 1;
-						cur[2] -= 24;
+						frm[1] -= 1;
+						frm[2] -= 24;
 						cost++;
 					}
 				}
 				else{
-					if(manifest[cur[2]-1].name == "UNUSED"){ // check is left is empty
-						cur[0]--;
-						cur[2]--;
+					if(manifest[frm[2]-1].name == "UNUSED"){ // check is left is empty
+						frm[0]--;
+						frm[2]--;
 						cost++;
 					}
 					else{ //move up
-						cur[1]++;
-						cur[2] += 24;
+						frm[1]++;
+						frm[2] += 24;
 						cost++;
-						while(cur[2] > 191){
-							if(cur[0] != too[0]){
+						while(frm[2] > 191){
+							if(frm[0] != too[0]){
 								cost++;
-								cur[0]--;
-								cur[2]--;
+								frm[0]--;
+								frm[2]--;
 							}
 							else{
 								cost++;
-								cur[1]--;
-								cur[2]-=24;
+								frm[1]--;
+								frm[2]-=24;
 							}
 						}
 					}
@@ -236,35 +235,39 @@ const findCost = (manifest, from, to) => {
 	}
 	//ship to ship
 	else {
-		if (frm[0] < too[0]){ //move right
+		if (frm[0] < too[0]) { //move right
 			while(frm[2] != too[2]){
 				if(frm[0] == too[0]){ //down movement
-					if(frm[1] != too[1]){
-						cur[1] -= 1;
-						cur[2] -= 12;
+					if(frm[1] > too[1]){
+						frm[1] -= 1;
+						frm[2] -= 12;
+						cost++;
+					} else {
+						frm[1]++;
+						frm[2] += 12;
 						cost++;
 					}
 				}
 				else{
-					if(manifest[cur[2]+1].name == "UNUSED"){ //check if right is empty
-						cur[0]++;
-						cur[2]++;
+					if(manifest[frm[2]+1].name == "UNUSED"){ //check if right is empty
+						frm[0]++;
+						frm[2]++;
 						cost++;
 					}
 					else{ // move up
-						cur[1]++;
-						cur[2] += 12;
+						frm[1]++;
+						frm[2] += 12;
 						cost++;
-						while(cur[2] > 95){
-							if(cur[0] != too[0]){
+						while (frm[2] > 95) {
+							if(frm[0] != too[0]){
 								cost++;
-								cur[0]++;
-								cur[2]++;
+								frm[0]++;
+								frm[2]++;
 							}
 							else{
 								cost++;
-								cur[1]--;
-								cur[2]-=12;
+								frm[1]--;
+								frm[2]-=12;
 							}
 						}
 					}
@@ -273,33 +276,37 @@ const findCost = (manifest, from, to) => {
 		}
 		else { //move left
 			while(frm[2] != too[2]){
-				if(frm[0] == too[0]){ // down movement
-					if(frm[1] != too[1]){
-						cur[1] -= 1;
-						cur[2] -= 12;
+				if(frm[0] == too[0]){ //down movement
+					if(frm[1] > too[1]){
+						frm[1] -= 1;
+						frm[2] -= 12;
+						cost++;
+					} else {
+						frm[1]++;
+						frm[2] += 12;
 						cost++;
 					}
 				}
 				else{
-					if(manifest[cur[2]-1].name == "UNUSED"){ // check is left is empty
-						cur[0]--;
-						cur[2]--;
+					if(manifest[frm[2]-1].name == "UNUSED"){ // check is left is empty
+						frm[0]--;
+						frm[2]--;
 						cost++;
 					}
 					else{ //move up
-						cur[1]++;
-						cur[2] += 12;
+						frm[1]++;
+						frm[2] += 12;
 						cost++;
-						while(cur[2] > 95){
-							if(cur[0] != too[0]){
+						while(frm[2] > 95){
+							if(frm[0] != too[0]){
 								cost++;
-								cur[0]--;
-								cur[2]--;
+								frm[0]--;
+								frm[2]--;
 							}
 							else{
 								cost++;
-								cur[1]--;
-								cur[2]-=12;
+								frm[1]--;
+								frm[2]-=12;
 							}
 						}
 					}
@@ -697,7 +704,6 @@ const sift = (manifest) => {
 	}
 
 	let goalState = siftGoalState(manifest);
-	console.log("goalState: ", goalState);
 	let initialHash = generateHash(manifest);
 	openSet.set(initialHash, [JSON.parse(JSON.stringify(manifest)), 0, listOfMoves, 84, 0]);
 
@@ -705,13 +711,11 @@ const sift = (manifest) => {
 		// Get the state with the lowest f value
 		let [currentHash, parent] = Array.from(openSet.entries()).sort((a, b) => a[1][1] - b[1][1])[0];
 		openSet.delete(currentHash);
-
 		let siftBalanced = siftHeuristic(parent[0], goalState, emptyManifest);
 		console.log("cost: ", parent[1], " g: ", parent[4], " h: ", siftBalanced, " move: ", parent[2][0]);
 		if (siftBalanced == 0 && bufempty(parent[0])) {
 			return parent[2];
 		}
-
 		closedSet.set(currentHash, parent);
 
 		let box = findtopbox(parent[0]);
@@ -727,7 +731,6 @@ const sift = (manifest) => {
 						tempManifest[box[i]] = { ...tempManifest[box[i]], name: "UNUSED", weight: 0 };
 						tempManifest[empty[j]] = { ...tempManifest[empty[j]], name: parent[0][box[i]].name, weight: parent[0][box[i]].weight };
 						
-						let sucBal = balanceCheck(tempManifest);
 						let g = parent[4] + sucCost;
 						let h = siftHeuristic(tempManifest, goalState, emptyManifest);
 						let f = g + h;
