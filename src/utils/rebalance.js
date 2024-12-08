@@ -5,7 +5,7 @@ import { list } from "postcss";
 // General function to rebalance the manifest:
 // First Run Greedy, if it doesn't work, run SIFT, else if time permits, run Normal
 const rebalance = (manifest) => {
-	return sift(manifest);
+	return greedy(manifest);
 };
 
 
@@ -328,9 +328,9 @@ const bufempty = (manifest) => {
 
 const greedy = (manifest) => {
 	const start = performance.now();
-	const totalTimeLimit = 0.5 * 60 * 1000; // 15 minutes
+	const totalTimeLimit = 15 * 60 * 1000; // 15 minutes
 
-	const listOfMoves = [];
+	let listOfMoves = [];
 
 	let curbestmove =[];
 
@@ -354,18 +354,20 @@ const greedy = (manifest) => {
 		if(map[bal[0]]){
 			map[bal[0]] += 1;
 			if(map[bal[0]] > 3){
+				console.log("move to sift it no work");
+				let greedtsiftresult = greedySift(manifest);
 				const greedyTime = performance.now() - start;
 				const remainingTime = totalTimeLimit - greedyTime;
 				if (remainingTime <= 0) {
 					console.warn("No time left after running greedy. Returning greedy solution.");
 					return listOfMoves;
 				}
-				console.log("move to sift it no work"); //change to sift after we make it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				let result = normal(manifest, remainingTime);
+				 //change to sift after we make it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				let result = sift(manifest, remainingTime);
 				if(result != null){
 					return result;
 				}
-				return listOfMoves;
+				return greedtsiftresult;
 			}
 		}
 		else {
@@ -385,11 +387,12 @@ const greedy = (manifest) => {
 					let boxname = newManifest[boxnum].name;
 					let boxweight = newManifest[boxnum].weight;
 					let tempManifest = JSON.parse(JSON.stringify(newManifest));
+					tempcost += findCost(tempManifest, crane, boxnum);
+					tempcost += findCost(tempManifest, boxnum, rightside);
 					tempManifest[boxnum] = { ...tempManifest[boxnum], name: "UNUSED", weight: 0 };
 					tempManifest[rightside] = { ...tempManifest[rightside], name: boxname, weight: boxweight};
 					let newbal = balanceCheck(tempManifest);
-					tempcost += findCost(tempManifest, crane, boxnum);
-					tempcost += findCost(tempManifest, boxnum, rightside);
+					
 					if(!forced){
 						forced = true;
 						bal = newbal;
@@ -399,7 +402,7 @@ const greedy = (manifest) => {
 							//flip
 							[Math.floor(boxnum/12)+1,(boxnum%12)+1],
 							[Math.floor(rightside/12)+1, (rightside%12)+1],
-						]
+						];
 					}
 					else if(newbal[0] <= bal[0] && curcost > tempcost) {
 						bal = newbal;
@@ -409,20 +412,20 @@ const greedy = (manifest) => {
 							//flip
 							[Math.floor(boxnum/12)+1, (boxnum%12)+1],
 							[Math.floor(rightside/12)+1, (rightside%12)+1],
-						]
+						];
 					}
 				}
 			}
 
 			//cost to move crane hand to starting box
 			console.log("moving ", crane, " to ", (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1));
-			cost += findCost(tempbest, crane, (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1));
+			cost += findCost(newManifest, crane, (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1));
 			crane = (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1);
 			console.log("crane moving", cost);
 
 			//cost to move box
 			console.log("moving ", crane, " to ", (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1));
-			cost += findCost(tempbest, crane, (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1));
+			cost += findCost(newManifest, crane, (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1));
 			crane = (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1);
 			console.log("box moving", cost);
 			newManifest = JSON.parse(JSON.stringify(tempbest));
@@ -440,11 +443,11 @@ const greedy = (manifest) => {
 					let boxname = newManifest[boxnum].name;
 					let boxweight = newManifest[boxnum].weight;
 					let tempManifest = JSON.parse(JSON.stringify(newManifest));
+					tempcost += findCost(tempManifest, crane, boxnum);
+					tempcost += findCost(tempManifest, boxnum, leftside);
 					tempManifest[boxnum] = { ...tempManifest[boxnum], name: "UNUSED", weight: 0 };
 					tempManifest[leftside] = { ...tempManifest[leftside], name: boxname, weight: boxweight};
 					let newbal = balanceCheck(tempManifest);
-					tempcost += findCost(tempManifest, crane, boxnum);
-					tempcost += findCost(tempManifest, boxnum, leftside);
 					if(!forced){
 						forced = true;
 						bal = newbal;
@@ -454,30 +457,30 @@ const greedy = (manifest) => {
 							//flip
 							[Math.floor(boxnum/12)+1, (boxnum%12)+1],
 							[Math.floor(leftside/12)+1, (leftside%12)+1],
-						]
+						];
 					}
 					else if(newbal[0] <= bal[0] && curcost > tempcost) {
 						bal = newbal;
 						tempbest = JSON.parse(JSON.stringify(tempManifest));
-						curcost = tempcost
+						curcost = tempcost;
 						curbestmove = [
 							//flip
 							[Math.floor(boxnum/12)+1, (boxnum%12)+1],
 							[Math.floor(leftside/12)+1, (leftside%12)+1],
-						]
+						];
 					}
 				}
 			}
 
 			//cost to move crane hand to starting box
 			console.log("moving ", crane, " to ", (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1));
-			cost += findCost(tempbest, crane, (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1));
+			cost += findCost(newManifest, crane, (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1));
 			crane = (curbestmove[0][0] - 1) * 12 + (curbestmove[0][1] - 1);
 			console.log("crane moving", cost);
 
 			//cost to move box
 			console.log("moving ", crane, " to ", (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1));
-			cost += findCost(tempbest, crane, (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1));
+			cost += findCost(newManifest, crane, (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1));
 			crane = (curbestmove[1][0] - 1) * 12 + (curbestmove[1][1] - 1);
 			console.log("box moving", cost);
 			newManifest = JSON.parse(JSON.stringify(tempbest));
@@ -498,14 +501,107 @@ const greedy = (manifest) => {
 	let result = normal(manifest, remainingTime);
 	console.log("result:", result);
 	if(result != null){
-		console.log("correct resturn result:", result);
+		console.log("correct return result:", result);
 		return result;
 	}
 	return listOfMoves;
 }
 
 const greedySift = (manifest) => {
+	let listOfMoves = [];
+	let goalState = siftGoalState(manifest);
+	let tempManifest = JSON.parse(JSON.stringify(manifest));
+	let cost = 0;
+	let crane = 84;
+	let emptyManifest = JSON.parse(JSON.stringify(manifest));
+	for (let i = 0; i < 96; i++) {
+		if (manifest[i].name != "UNUSED" && manifest[i].name != "NAN") {
+			emptyManifest[i] = { ...emptyManifest[i], name: "UNUSED", weight: 0 };
+		}
+	}
+	if(siftHeuristic(tempManifest, goalState, emptyManifest) != 0){
+		for(let i = 0; i<96; i++){
+			if((tempManifest[i].name != goalState[i].name || tempManifest[i].weight != goalState[i].weight)  && tempManifest[i].name != "NAN" && goalState[i].name != "UNUSED"){
+				let cratelocation = 0;
+				for(let k = 0; k<95; k++){
+					// console.log(k, " 1: ", tempManifest[k].name, " 2: ", goalState[i].name, " 3: ", tempManifest[k].weight, " 4: ", goalState[i].weight)
+					if(tempManifest[k].name == goalState[i].name && tempManifest[k].weight == goalState[i].weight){
+						cratelocation = k;
+						break;
+					}
+				}
+				
 
+				//make sure destination is empty
+				let topempty = findtopempty(tempManifest);
+				while(topempty[tempManifest[i].col-1] != i){
+					let topbox = findtopbox(tempManifest)[tempManifest[i].col-1];
+					for(let j = 0; j<36; j++){
+						if(j != tempManifest[i].col-1 && j != tempManifest[cratelocation].col-1){
+							if(topempty[j] != -1){
+								let boxname = tempManifest[topbox].name;
+								let boxweight = tempManifest[topbox].weight;
+								cost += findCost(tempManifest, crane, topbox);
+								cost += findCost(tempManifest, topbox, topempty[j]);
+								crane = topempty[j];
+								tempManifest[topbox] = { ...tempManifest[topbox], name: "UNUSED", weight: 0 };
+								tempManifest[topempty[j]] = { ...tempManifest[topempty[j]], name: boxname, weight: boxweight};
+								listOfMoves.push([
+									[Math.floor(topbox/12)+1, (topbox%12)+1],
+									[Math.floor(topempty[j]/12)+1, (topempty[j]%12)+1],
+								]);
+								topempty = findtopempty(tempManifest);
+								break;
+							}
+						}
+					}
+				}
+				
+				//if destination is empty, make sure target crate can go there
+				let tb = findtopbox(tempManifest);
+				while(tb[tempManifest[cratelocation].col-1] != cratelocation){
+					for(let j = 0; j<36; j++){
+						if(j != tempManifest[i].col-1 && j != tempManifest[cratelocation].col-1){
+							if(topempty[j] != -1){
+								let topbox = tb[tempManifest[cratelocation].col-1]
+								let boxname = tempManifest[topbox].name;
+								let boxweight = tempManifest[topbox].weight;
+								cost += findCost(tempManifest, crane, topbox);
+								cost += findCost(tempManifest, topbox, topempty[j]);
+								crane = topempty[j];
+								tempManifest[topbox] = { ...tempManifest[topbox], name: "UNUSED", weight: 0 };
+								tempManifest[topempty[j]] = { ...tempManifest[topempty[j]], name: boxname, weight: boxweight};
+								listOfMoves.push([
+									[Math.floor(topbox/12)+1, (topbox%12)+1],
+									[Math.floor(topempty[j]/12)+1, (topempty[j]%12)+1],
+								]);
+								topempty = findtopempty(tempManifest);
+								tb = findtopbox(tempManifest);
+								break;
+							}
+						}
+					}
+				}
+
+
+				let boxname = tempManifest[cratelocation].name;
+				let boxweight = tempManifest[cratelocation].weight;
+				cost += findCost(tempManifest, crane, cratelocation);
+				cost += findCost(tempManifest, cratelocation, i);
+				crane = i;
+				tempManifest[cratelocation] = { ...tempManifest[cratelocation], name: "UNUSED", weight: 0 };
+				tempManifest[i] = { ...tempManifest[i], name: boxname, weight: boxweight};
+				listOfMoves.push([
+					[Math.floor(cratelocation/12)+1, (cratelocation%12)+1],
+					[Math.floor(i/12)+1, (i%12)+1],
+				]);
+				
+				console.log("done moves");
+				console.log(listOfMoves);
+			}
+		}
+	}
+	return listOfMoves;
 }
 
 function generateHash(manifest) {
@@ -679,7 +775,8 @@ const siftGoalState = (manifest) => {
 	return nanManifest;
 }
 
-const sift = (manifest) => {
+const sift = (manifest, remainingTime) => {
+	let startTime = performance.now();
 	let listOfMoves = [];
 	let openSet = new Map(); // Hash -> [State, f, moves, lastEmpty, g]
 	let closedSet = new Map();
@@ -708,6 +805,11 @@ const sift = (manifest) => {
 	openSet.set(initialHash, [JSON.parse(JSON.stringify(manifest)), 0, listOfMoves, 84, 0]);
 
 	while (openSet.size > 0) {
+		let elapsedTime = performance.now() - startTime;
+		if (elapsedTime > remainingTime) { // 
+			console.log("Time limit exceededddddddddddddddddddddddddddd.");
+			return null; // Exit the function if time is exceeded
+		}
 		// Get the state with the lowest f value
 		let [currentHash, parent] = Array.from(openSet.entries()).sort((a, b) => a[1][1] - b[1][1])[0];
 		openSet.delete(currentHash);

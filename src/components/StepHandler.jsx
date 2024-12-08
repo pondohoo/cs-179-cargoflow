@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import AdvanceStep from "./AdvanceStep";
-
+ 
 import loadUnload from "@/utils/loadUnload";
 import rebalance from "@/utils/rebalance";
-
+ 
 const StepHandler = ({
 	manifest,
 	setManifest,
@@ -15,22 +15,26 @@ const StepHandler = ({
 	setCurrentStep,
 	setOptimalSteps,
 }) => {
+	const [operationDuration, setOperationDuration] = useState(0);
+ 
 	const getMoves = () => {
 		if (manifest === null) {
 			throw new Error("No manifest found");
 		}
+		const startTime = performance.now();
+		let generatedOptimalSteps;
 		if (operation === "rebalance") {
-			const generatedOptimalSteps = rebalance(manifest);
-			setOptimalSteps(generatedOptimalSteps);
-			setCurrentStep([0, generatedOptimalSteps[0]]);
-			console.log("optimalSteps", generatedOptimalSteps);
+			generatedOptimalSteps = rebalance(manifest);
 		} else {
-			const generatedOptimalSteps = loadUnload(manifest,containersToLoad,containersToUnload);
-			setOptimalSteps(generatedOptimalSteps);
-			setCurrentStep([0, generatedOptimalSteps[0]]);
-			console.log("optimalSteps", generatedOptimalSteps);
+			generatedOptimalSteps = loadUnload(manifest, containersToLoad, containersToUnload);
 		}
+		const endTime = performance.now();
+		setOperationDuration(endTime - startTime);
+		setOptimalSteps(generatedOptimalSteps);
+		setCurrentStep([0, generatedOptimalSteps[0]]);
+		console.log("optimalSteps", generatedOptimalSteps);
 	};
+ 
 	const handleManifestUpdate = () => {
 		const currentCol = currentStep[1][0][1];
 		const currentRow = currentStep[1][0][0];
@@ -65,6 +69,7 @@ const StepHandler = ({
 		};
 		return newManifest;
 	};
+ 
 	const nextStep = () => {
 		if (
 			currentStep[0] === optimalSteps.length - 1 ||
@@ -77,15 +82,19 @@ const StepHandler = ({
 		setManifest(handleManifestUpdate);
 		setCurrentStep([currentStep[0] + 1, optimalSteps[currentStep[0] + 1]]);
 	};
+ 
 	return (
-		<AdvanceStep
-			progress={nextStep}
-			optimalSteps={optimalSteps}
-			manifest={manifest}
-			start={getMoves}
-			currentStep={currentStep}
-		/>
+		<div>
+			<AdvanceStep
+				progress={nextStep}
+				optimalSteps={optimalSteps}
+				manifest={manifest}
+				start={getMoves}
+				currentStep={currentStep}
+			/>
+			<p>Operation Duration: {operationDuration.toFixed(2)} ms</p>
+		</div>
 	);
 };
-
+ 
 export default StepHandler;
