@@ -9,6 +9,13 @@ export default function downloadLogs() {
 
   const dbRequest: IDBOpenDBRequest = indexedDB.open(databaseName, 1);
 
+  dbRequest.onupgradeneeded = (event: any) => {
+    const db: IDBDatabase = event.target.result;
+    const objectStore: IDBObjectStore = db.createObjectStore(storeName, {
+      keyPath: "id",
+    });
+  };
+
   dbRequest.onerror = (event: any) => {
     console.error("Error opening IndexedDB database.");
   };
@@ -25,7 +32,6 @@ export default function downloadLogs() {
     };
 
     getRequest.onsuccess = (event: any) => {
-      console.log("taco success")
       const result = event.target.result;
       let textContent: string = "";
 
