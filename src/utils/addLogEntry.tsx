@@ -11,6 +11,7 @@ export default function addLogEntry(inputStr: string) {
     const objectStore: IDBObjectStore = db.createObjectStore(storeName, {
       keyPath: "id",
     });
+    objectStore.add({ id: "password", password: "admin" });
   };
 
   dbRequest.onsuccess = (event: any) => {

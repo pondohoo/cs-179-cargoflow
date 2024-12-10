@@ -1,4 +1,3 @@
-import AddLogEntry from "@/components/AddLogEntry";
 import Selection from "@/components/Selection";
 import WipeStateButton from "@/components/WipeStateButton";
 const Home = () => {
@@ -6,7 +5,6 @@ const Home = () => {
 		<>
 			<Selection />
 			<WipeStateButton />
-			<AddLogEntry />
 		</>
 	);
 };
