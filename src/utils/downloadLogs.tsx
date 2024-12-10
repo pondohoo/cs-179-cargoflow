@@ -14,6 +14,7 @@ export default function downloadLogs() {
     const objectStore: IDBObjectStore = db.createObjectStore(storeName, {
       keyPath: "id",
     });
+    objectStore.add({ id: "password", password: "admin" });
   };
 
   dbRequest.onerror = (event: any) => {
