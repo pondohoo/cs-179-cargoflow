@@ -22,6 +22,34 @@ export default function addLogEntry(inputStr: string) {
 
     getRequest.onsuccess = (event: any) => {
       const result = event.target.result;
+      const currentDate: Date = new Date();
+      const months: string[] = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      const currentMonth: string = months[currentDate.getMonth()];
+      const currentDay: number = currentDate.getDate();
+      const currentYear: number = currentDate.getFullYear();
+      const currentHour: string = currentDate
+        .getHours()
+        .toString()
+        .padStart(2, "0");
+      const currentMinutes: string = currentDate
+        .getMinutes()
+        .toString()
+        .padStart(2, "0");
+
+      inputStr = `${currentMonth} ${currentDay}, ${currentYear}: ${currentHour}:${currentMinutes} ${inputStr}`;
 
       // Update the stringlist in current record if the record already exists.
       if (result !== undefined) {
