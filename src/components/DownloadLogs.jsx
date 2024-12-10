@@ -20,6 +20,12 @@ const DownloadLogs = () => {
 
     dbRequest.onsuccess = (event) => {
       const db = event.target.result;
+
+      if(!db.objectStoreNames.contains(storeName)) {
+        setErrorMessage("No logs found for the current year.");
+        return;
+      }
+
       const transaction = db.transaction(storeName, "readonly");
       const objectStore = transaction.objectStore(storeName);
 
