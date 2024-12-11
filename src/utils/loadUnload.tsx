@@ -122,7 +122,8 @@ const loadUnload = (manifest, containersToLoad, containersToUnload) => {
     return bestDest.coordinates;
   };
   const ListOfMoves = [[[8, 1],loadDest(grid, containersToUnload),]];
-  return ListOfMoves;
+  const cost = 0
+  return {ListOfMoves, cost};
   // const listOfMoves = [
   //   [
   //     [2, 6],

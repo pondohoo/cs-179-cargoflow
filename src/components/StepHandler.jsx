@@ -23,10 +23,17 @@ const StepHandler = ({
 		}
 		const startTime = performance.now();
 		let generatedOptimalSteps;
+		let generatedCost;
 		if (operation === "rebalance") {
-			generatedOptimalSteps = rebalance(manifest);
+			const generatedOptimalStepsAndCost = rebalance(manifest);
+			const { listOfMoves, cost } = generatedOptimalStepsAndCost;
+			generatedOptimalSteps = listOfMoves;
+			generatedCost = cost;
 		} else {
-			generatedOptimalSteps = loadUnload(manifest, containersToLoad, containersToUnload);
+			const generatedOptimalStepsAndCost = loadUnload(manifest, containersToLoad, containersToUnload);
+			const { listOfMoves, cost } = generatedOptimalStepsAndCost;
+			generatedOptimalSteps = listOfMoves;
+			generatedCost = cost;
 		}
 		const endTime = performance.now();
 		setOperationDuration(endTime - startTime);

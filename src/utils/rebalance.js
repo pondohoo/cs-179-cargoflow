@@ -1,11 +1,12 @@
-import AdvanceStep from "@/components/AdvanceStep";
-import { list } from "postcss";
 
 
 // General function to rebalance the manifest:
 // First Run Greedy, if it doesn't work, run SIFT, else if time permits, run Normal
 const rebalance = (manifest) => {
-	return greedy(manifest);
+	const cost = 0;
+	const listOfMoves = greedy(manifest);
+	const listOfMovesAndCost = { listOfMoves, cost }
+	return listOfMovesAndCost;
 };
 
 

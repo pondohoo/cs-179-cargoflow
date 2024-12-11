@@ -19,10 +19,10 @@ const AdvanceStep = ({ start, currentStep, progress }) => {
 				<button onClick={handleStart} className="bg-ibm-yellow p-2 text-black">
 					Start
 				</button>
-			) : ( currentStep &&
+			) : ( currentStep ? (
 				<button onClick={progress} className="bg-ibm-yellow p-2 text-black">
 					Progress
-				</button>
+				</button> ) : ( console.log("fweiufhewiufhewfhewuifhewifuhweuifw"))
 			)}
 		</>
 	);
