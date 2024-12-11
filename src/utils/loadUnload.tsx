@@ -78,24 +78,28 @@ function findLowestCostUnload(
   return { row: costs[0].row, col: costs[0].col };
 }
 
+const gridUpdate = (grid: ManifestEntry[][], coordinate:{row: number, col: number}, containerName: string) => {
+  let row = coordinate.row;
+  let col = coordinate.col;
+  grid[row][col].name = containerName;
+}
+
+const diffgridUpdate = (grid: ManifestEntry[][], coordinate: [number,number], containerName) => {
+  grid[coordinate[0]][coordinate[1]].name = containerName;
+}
+
 const loadUnload = (manifest, containersToLoad, containersToUnload) => {
   let grid: ManifestEntry[][] = parseManifestToGrid(manifest);
-  
-	// Sample call only.
-	let rc: { row: number; col: number } = findLowestCostUnload(
-    grid,
-    containersToUnload
-  );
 
-  const loadDest = (grid: ManifestEntry[][], containersToUnload: string[]): {row: number; col: number} | null => {
-    let bestDest: { distance: number; coordinates: {row: number; col: number} | null } = {
+  const loadDest = (grid: ManifestEntry[][], containersToUnload: string[]): [number,number] | null => {
+    let bestDest: { distance: number; coordinates: [number,number] | null } = {
       distance: Infinity,
       coordinates: null,
     };
 
     for (let col = 0; col < 12; col++) {
       let skipColumnF = false;
-      for (let row = 0; row < 7; row++) {
+      for (let row = 0; row < 8; row++) {
         const cellName = grid[row][col].name;
         if (containersToUnload.includes(cellName)){
           skipColumnF = true;
@@ -109,7 +113,7 @@ const loadUnload = (manifest, containersToLoad, containersToUnload) => {
           // Check for available square in grid
           const currDistance = Math.abs(7 - row) + Math.abs(0-col);
           if (currDistance < bestDest.distance){
-            bestDest = {distance: currDistance, coordinates: {row: row + 1, col: col + 1}};
+            bestDest = {distance: currDistance, coordinates: [row+1,col+1]};
             break;
           }
           }
@@ -118,11 +122,63 @@ const loadUnload = (manifest, containersToLoad, containersToUnload) => {
       if (bestDest.coordinates === null){
         return null;
       }
+      return bestDest.coordinates;
+    };
 
-    return bestDest.coordinates;
-  };
-  const ListOfMoves = [[[8, 1],loadDest(grid, containersToUnload),]];
-  return ListOfMoves;
+  const truckToGrid = [[15,39],[13,37],];
+  const gridToTruck = [[13,37],[15,39],];
+  const listOfMoves = [];
+  // DISCOVERED GRID UPDATE FUNCTION BUG/ERROR
+  // grid[loadrc[0]][loadrc[1]].name = containersToLoad[0];
+  // loadrc = loadDest(grid,containersToLoad);
+  // listOfMoves.push([[7,1],loadrc]);
+  // loadrc = loadDest(grid, containersToUnload);
+  // return listOfMoves;
+
+  // while(containersToUnload.length > 0 && containersToLoad.length > 0){
+    //Update rc to lowest unload cost in current grid
+    // const rc = findLowestCostUnload(grid, containersToUnload);
+    // const outputUnload = [rc.row,rc.col];
+    // listOfMoves.push([outputUnload,[13,37]]);
+
+    //ADD THIS PUSH STATEMENT, once currentWeight = manifest.[currentEntry].weight is resolved
+    //listOfMoves.push(gridToTruck);
+    
+    // gridUpdate(grid, rc, "UNUSED");
+    // containersToUnload.shift();
+    // let loadrc = loadDest(grid, containersToUnload);
+    // let outputLoad = [loadrc.row, loadrc.col];
+    
+    // // Add this push statement, once the same currentWeight bug is fixed
+    // // listOfMoves.push(truckToGrid);
+    
+    // listOfMoves.push([[13,37],[outputLoad]]);
+    // gridUpdate(grid, loadrc, containersToLoad[0]);
+    // containersToLoad.shift();
+  // }
+
+  // while (containersToUnload.length > 0){
+  //   let rc = findLowestCostUnload(grid, containersToUnload);
+  //   listOfMoves.push(truckToGrid);
+  //   //Add following push statement, once currentWeight = manifest[currentEntry].weight works
+  //   //listOfMoves.push(truckToGrid);
+  //   listOfMoves.push([[13,37],rc]);
+  //   //gridUpdate
+  //   containersToUnload.shift();
+  // }
+  // return listOfMoves;
+
+  // while (containersToLoad.length > 0){
+  //   let loadrc = loadDest(grid, containersToUnload);
+  //   listOfMoves.push(gridToTruck);
+  //   //Add following push statement, once currentWeight = manifest[currentEntry].weight works
+  //   //listOfMoves.push(truckToGrid);
+  //   listOfMoves.push([[13,37],loadrc]);
+  //   // diffgridUpdate(grid,loadrc,containersToLoad[0]);
+  //   containersToLoad.shift();
+  // }
+  // return listOfMoves;
+
   // const listOfMoves = [
   //   [
   //     [2, 6],
