@@ -87,8 +87,8 @@ const loadUnload = (manifest, containersToLoad, containersToUnload) => {
     containersToUnload
   );
 
-  const loadDest = (grid: ManifestEntry[][], containersToUnload: string[]): [number, number] | null => {
-    let bestDest: { distance: number; coordinates: [number, number] | null } = {
+  const loadDest = (grid: ManifestEntry[][], containersToUnload: string[]): {row: number; col: number} | null => {
+    let bestDest: { distance: number; coordinates: {row: number; col: number} | null } = {
       distance: Infinity,
       coordinates: null,
     };
@@ -109,7 +109,7 @@ const loadUnload = (manifest, containersToLoad, containersToUnload) => {
           // Check for available square in grid
           const currDistance = Math.abs(7 - row) + Math.abs(0-col);
           if (currDistance < bestDest.distance){
-            bestDest = {distance: currDistance, coordinates: [row + 1,col + 1]};
+            bestDest = {distance: currDistance, coordinates: {row: row + 1, col: col + 1}};
             break;
           }
           }
