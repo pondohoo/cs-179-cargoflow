@@ -78,6 +78,21 @@ function findLowestCostUnload(
   return { row: costs[0].row, col: costs[0].col };
 }
 
+function gridUpdate(
+  grid: ManifestEntry[][],
+  coordinate: [number, number],
+  containerName: string
+){
+  grid[coordinate[0]][coordinate[1]].name = containerName;
+}
+/*
+  loadDest and findLowestCostUnload both return coordinates, so what we can do is compare the manhattan distance of both
+  to the top left corner portal, then choose the smaller one to start the listOfMoves operation then interleave load, unload, and vice versa. 
+  to-do: 
+  is a move containers above unload function
+  the while loop that interleaves the load or unload
+*/
+
 const loadUnload = (manifest, containersToLoad, containersToUnload) => {
   let grid: ManifestEntry[][] = parseManifestToGrid(manifest);
   
