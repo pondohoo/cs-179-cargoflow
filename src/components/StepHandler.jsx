@@ -3,6 +3,7 @@ import AdvanceStep from "./AdvanceStep";
  
 import loadUnload from "@/utils/loadUnload";
 import rebalance from "@/utils/rebalance";
+import ExportManifest from "./ExportManifest";
  
 const StepHandler = ({
 	manifest,
@@ -14,6 +15,7 @@ const StepHandler = ({
 	currentStep,
 	setCurrentStep,
 	setOptimalSteps,
+	setDone,
 }) => {
 	const [operationDuration, setOperationDuration] = useState(0);
  
@@ -84,6 +86,7 @@ const StepHandler = ({
 			!optimalSteps
 		) {
 			setCurrentStep(null);
+			setDone(true);
 			return;
 		}
 		setManifest(handleManifestUpdate);
@@ -92,14 +95,14 @@ const StepHandler = ({
  
 	return (
 		<div>
-			<AdvanceStep
+			<p>Operation Duration: {operationDuration.toFixed(2)} ms</p>
+			<div className="flex justify-center"><AdvanceStep
 				progress={nextStep}
 				optimalSteps={optimalSteps}
 				manifest={manifest}
 				start={getMoves}
 				currentStep={currentStep}
-			/>
-			<p>Operation Duration: {operationDuration.toFixed(2)} ms</p>
+			/></div>
 		</div>
 	);
 };

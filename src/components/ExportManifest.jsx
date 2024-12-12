@@ -1,3 +1,4 @@
+import wipeState from "@/utils/wipeState";
 import { useState } from "react";
 
 const ExportManifest = ({ manifest, shipName }) => {
@@ -37,17 +38,22 @@ const ExportManifest = ({ manifest, shipName }) => {
         link.click();
         document.body.removeChild(link);
 
-        setShowPopup(false);
+
     };
 
-    const handlePopup = () => {
-        setShowPopup(!showPopup);
+    const handleOpenPopup = () => {
+        setShowPopup(true);
     };
+
+    const handleClosePopup = () => {
+        wipeState();
+        window.location.reload();
+    }
 
     return (
         <div>
             <button
-                onClick={handlePopup}
+                onClick={handleOpenPopup}
                 className="px-4 py-2 bg-ibm-yellow text-white font-medium rounded shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300"
             >
                 Export Manifest
@@ -68,7 +74,7 @@ const ExportManifest = ({ manifest, shipName }) => {
                                 Download Manifest
                             </button>
                             <button
-                                onClick={handlePopup}
+                                onClick={handleClosePopup}
                                 className="px-4 py-2 bg-ibm-gray text-white font-medium rounded shadow hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300"
                             >
                                 Close
