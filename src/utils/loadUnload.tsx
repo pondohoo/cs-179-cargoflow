@@ -29,7 +29,7 @@ function findLowestCostUnload(
     for (let r = 7; r >= 0; r--) {
       const currCell: ManifestEntry = grid[r][c];
 
-      if (currCell.name == "NAN" || currCell.name == "UNUSED") {
+      if (currCell.name == "UNUSED") {
         continue;
       }
 
@@ -57,7 +57,7 @@ function findLowestCostUnload(
         let num_blockingContainers_above: number = 0;
         while (temp_r <= 7) {
           const tempCell: ManifestEntry = grid[temp_r][c];
-          if (tempCell.name != "NAN" && tempCell.name != "UNUSED") {
+          if (tempCell.name != "UNUSED") {
             num_blockingContainers_above += 1;
           } else {
             break;
@@ -117,7 +117,7 @@ function findBestCoordsToMoveBlockingContainer(
         second_pass_best_row == -1
       ) {
         while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][l].name == "NAN" || grid[i][l].name == "UNUSED") {
+          if (grid[i][l].name == "UNUSED") {
             second_pass_best_row = i;
             second_pass_best_col = l;
           }
@@ -127,7 +127,7 @@ function findBestCoordsToMoveBlockingContainer(
         break;
       }
 
-      if (currCell.name == "NAN" || currCell.name == "UNUSED") {
+      if (currCell.name == "UNUSED") {
         return { row: i, col: l };
       }
     }
@@ -142,7 +142,7 @@ function findBestCoordsToMoveBlockingContainer(
         second_pass_best_row == -1
       ) {
         while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][r].name == "NAN" || grid[i][r].name == "UNUSED") {
+          if (grid[i][r].name == "UNUSED") {
             second_pass_best_row = i;
             second_pass_best_col = r;
           }
@@ -152,7 +152,7 @@ function findBestCoordsToMoveBlockingContainer(
         break;
       }
 
-      if (currCell.name == "NAN" || currCell.name == "UNUSED") {
+      if (currCell.name == "UNUSED") {
         return { row: i, col: r };
       }
     }
@@ -167,7 +167,7 @@ function findBestCoordsToMoveBlockingContainer(
         second_pass_best_row == -1
       ) {
         while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][l].name == "NAN" || grid[i][l].name == "UNUSED") {
+          if (grid[i][l].name == "UNUSED") {
             second_pass_best_row = i;
             second_pass_best_col = l;
           }
@@ -177,7 +177,7 @@ function findBestCoordsToMoveBlockingContainer(
         break;
       }
 
-      if (currCell.name == "NAN" || currCell.name == "UNUSED") {
+      if (currCell.name == "UNUSED") {
         return { row: i, col: l };
       }
     }
@@ -192,7 +192,7 @@ function findBestCoordsToMoveBlockingContainer(
         second_pass_best_row == -1
       ) {
         while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][r].name == "NAN" || grid[i][r].name == "UNUSED") {
+          if (grid[i][r].name == "UNUSED") {
             second_pass_best_row = i;
             second_pass_best_col = r;
           }
@@ -202,7 +202,7 @@ function findBestCoordsToMoveBlockingContainer(
         break;
       }
 
-      if (currCell.name == "NAN" || currCell.name == "UNUSED") {
+      if (currCell.name == "UNUSED") {
         return { row: i, col: r };
       }
     }
@@ -224,7 +224,7 @@ function moveBlockingContainers(
   // Check if there are any blocking containers above target container.
   if (
     row + 1 < 8 &&
-    (grid[row + 1][col].name == "NAN" || grid[row + 1][col].name == "UNUSED")
+    (grid[row + 1][col].name == "UNUSED")
   ) {
     return [grid, listOfMoves];
   } else {
@@ -232,7 +232,6 @@ function moveBlockingContainers(
     let i: number = row + 1;
     while (
       i < 8 &&
-      grid[i][col].name != "NAN" &&
       grid[i][col].name != "UNUSED"
     ) {
       blockingContainers.push({ row: i, col: col });
