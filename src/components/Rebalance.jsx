@@ -6,6 +6,7 @@ const Rebalance = ({manifest,
 					currentStep,
 					optimalSteps,
 					setOptimalSteps,
+          setDone,
 					setCurrentStep,setManifest}) => {
   return (
     <div className="flex-col flex items-center justify-center">
@@ -21,6 +22,7 @@ const Rebalance = ({manifest,
         currentStep={currentStep} 
         setCurrentStep={setCurrentStep} 
         setOptimalSteps={setOptimalSteps}
+        setDone={setDone}
       />
     </div>
   );

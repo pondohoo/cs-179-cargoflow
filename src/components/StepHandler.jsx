@@ -4,6 +4,7 @@ import DisplayInstructions from "./DisplayInstructions";
  
 import loadUnload from "@/utils/loadUnload";
 import rebalance from "@/utils/rebalance";
+import ExportManifest from "./ExportManifest";
  
 const StepHandler = ({
 	manifest,
@@ -15,6 +16,7 @@ const StepHandler = ({
 	currentStep,
 	setCurrentStep,
 	setOptimalSteps,
+	setDone,
 }) => {
 	const [operationDuration, setOperationDuration] = useState(0);
 
@@ -41,6 +43,7 @@ const StepHandler = ({
 		setOptimalSteps(generatedOptimalSteps);
 		setCurrentStep([0, generatedOptimalSteps[0]]);
 		console.log("optimalSteps", generatedOptimalSteps);
+		console.log("currentstep first step is", [0, generatedOptimalSteps[0]]);
 	};
  
 	const handleManifestUpdate = () => {
@@ -65,47 +68,56 @@ const StepHandler = ({
 		const nextEntry = (nextRow - 1) * 12 + (nextCol - 1);
 		console.log("nextCol", nextCol, "nextRow", nextRow);
 		const newManifest = [...manifest];
+		console.log("newManifest", newManifest);
 		newManifest[currentEntry] = {
 			...newManifest[currentCol - currentRow],
 			name: "UNUSED",
 			weight: 0,
+			row: currentRow,
+			col: currentCol,
 		};
 		newManifest[nextEntry] = {
 			...newManifest[nextCol - nextRow],
 			name: currentName,
 			weight: currentWeight,
+			row: nextRow,
+			col: nextCol,
 		};
 		return newManifest;
 	};
  
 	const nextStep = () => {
+		setManifest(handleManifestUpdate);
+		console.log("currentStep", currentStep);
 		if (
 			currentStep[0] === optimalSteps.length - 1 ||
 			!currentStep ||
 			!optimalSteps
 		) {
 			setCurrentStep(null);
+			setDone(true);
 			return;
 		}
-		setManifest(handleManifestUpdate);
 		setCurrentStep([currentStep[0] + 1, optimalSteps[currentStep[0] + 1]]);
 	};
 	
 	return (
 		<div>
-			<AdvanceStep
-				progress={nextStep}
-				optimalSteps={optimalSteps}
-				manifest={manifest}
-				start={getMoves}
-				currentStep={currentStep}
-			/>
-			<DisplayInstructions
-				optimalSteps={optimalSteps}
-				currentStep={currentStep}
-				manifest={manifest}
-			/>
 			<p>Operation Duration: {operationDuration.toFixed(2)} ms</p>
+			<div className="flex justify-center">
+				<AdvanceStep
+					progress={nextStep}
+					optimalSteps={optimalSteps}
+					manifest={manifest}
+					start={getMoves}
+					currentStep={currentStep}
+				/>
+				<DisplayInstructions
+					optimalSteps={optimalSteps}
+					currentStep={currentStep}
+					manifest={manifest}
+				/>
+			</div>
 		</div>
 	);
 };
