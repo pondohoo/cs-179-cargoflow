@@ -1,34 +1,43 @@
-import React from "react";
-
 const Submission = () => {
 	return (
-		<div className="p-8 font-sans leading-relaxed">
-			<h1 className="text-2xl font-bold mb-2">Team CargoMovers</h1>
-			<p className="italic text-gray-600 mb-4">
-				This webpage was last edited on 12-03-2024
-			</p>
+		<div className="text-black bg-blue-100 p-8 font-sans leading-relaxed">
+			<div className="flex gap-10">
+				<h1 className="text-2xl font-bold mb-2">Team CargoFlow Inc.</h1>
+				<p className="italic text-gray-600 mb-4">
+					(This webpage was last edited on 12-13-2024)
+				</p>
+			</div>
 
 			<h2 className="text-xl font-semibold mb-2">Team Members</h2>
 			<ul className="list-disc list-inside mb-4">
 				<li>
-					Joe Smith,{" "}
-					<a href="mailto:joes@cs.ucr.edu" className="text-blue-600 underline">
-						joes@cs.ucr.edu
+					Jason Chau,{" "}
+					<a href="mailto:jchau044@ucr.edu" className="text-blue-600 underline">
+						jchau044@ucr.edu
 					</a>
 				</li>
 				<li>
-					Sue Tan,{" "}
-					<a
-						href="mailto:suetan@cs.ucr.edu"
-						className="text-blue-600 underline"
-					>
-						suetan@cs.ucr.edu
+					Danniel Kim,{" "}
+					<a href="mailto:dkim481@ucr.edu" className="text-blue-600 underline">
+						dkim481@ucr.edu
 					</a>
 				</li>
 				<li>
-					Ning Hu,{" "}
-					<a href="mailto:Nhi03@cs.ucr.edu" className="text-blue-600 underline">
-						Nhi03@cs.ucr.edu
+					Gurjot Singh,{" "}
+					<a href="mailto:gsing064@ucr.edu" className="text-blue-600 underline">
+						gsing064@ucr.edu
+					</a>
+				</li>
+				<li>
+					Desmond Chi,{" "}
+					<a href="mailto:dchi008@ucr.edu" className="text-blue-600 underline">
+						dchi008@ucr.edu
+					</a>
+				</li>
+				<li>
+					Theo Fernandez,{" "}
+					<a href="mailto:tfern009@ucr.edu" className="text-blue-600 underline">
+						tfern009@ucr.edu
 					</a>
 				</li>
 			</ul>
@@ -41,7 +50,10 @@ const Submission = () => {
 					the elicitation.
 				</li>
 				<li>
-					<strong>CargoMoversProjectPitchORIGINAL.pdf</strong> - Our original
+					<a
+						href="https://drive.google.com/file/d/1FOM86qgRk5hVelKeKrLsziqeBVaV9P2Y/view?usp=sharing"
+						className="text-blue-600 underline"
+					><strong>CargoFlowProjectPitchORIGINAL.pdf</strong></a> - Our original
 					pitch to Mr. Keogh, delivered on March 17th, 2023, at 10:00 AM.
 				</li>
 				<li>
