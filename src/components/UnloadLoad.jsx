@@ -8,7 +8,7 @@ import PinkSquareAboveBuffer from "./PinkSquareAboveBuffer"
 import PinkSquareAboveShip from "./PinkSquareAboveShip"
 import LoadingTruck from "./LoadingTruck"
 
-const UnloadLoad = ({manifest, operation, currentStep, setManifest, optimalSteps, setOptimalSteps, setCurrentStep}) => {
+const UnloadLoad = ({manifest, operation, currentStep, setManifest, optimalSteps, setOptimalSteps, setCurrentStep, setDone}) => {
   console.log("manifest at unloadload stage is ", manifest)
 	const [containersToLoad, setContainersToLoad] = useState(() => {
 		const savedContainersToLoad = localStorage.getItem("containersToLoad");

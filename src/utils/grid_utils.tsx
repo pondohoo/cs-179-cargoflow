@@ -13,13 +13,10 @@ export default function parseManifestToGrid(
   for (let r = 0; r < 8; r++) {
     let row: ManifestEntry[] = [];
     for (let c = 0; c < 12; c++) {
-      row.push(manifest[r * 12 + c]);
+      row.push(JSON.parse(JSON.stringify(manifest[r * 12 + c])));
     }
     grid.push(row);
   }
 
   return grid;
-}
-
-export function modifyManifestGrid(grid: Manifest[][], manifest: ManifestEntry[]): ManifestEntry[] {
 }
