@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AdvanceStep from "./AdvanceStep";
+import DisplayInstructions from "./DisplayInstructions";
  
 import loadUnload from "@/utils/loadUnload";
 import rebalance from "@/utils/rebalance";
@@ -18,7 +19,7 @@ const StepHandler = ({
 	setDone,
 }) => {
 	const [operationDuration, setOperationDuration] = useState(0);
- 
+
 	const getMoves = () => {
 		if (manifest === null) {
 			throw new Error("No manifest found");
@@ -99,17 +100,30 @@ const StepHandler = ({
 		}
 		setCurrentStep([currentStep[0] + 1, optimalSteps[currentStep[0] + 1]]);
 	};
- 
+	
+	const formatDuration = (duration) => {
+		const minutes = Math.floor(duration / 60000);
+		const seconds = ((duration % 60000) / 1000).toFixed(2);
+		return `${minutes}m ${seconds}s`;
+	};
+
 	return (
 		<div>
-			<p>Operation Duration: {operationDuration.toFixed(2)} ms</p>
-			<div className="flex justify-center"><AdvanceStep
-				progress={nextStep}
-				optimalSteps={optimalSteps}
-				manifest={manifest}
-				start={getMoves}
-				currentStep={currentStep}
-			/></div>
+			<p>Operation Duration: {formatDuration(operationDuration)}</p>
+			<div className="flex justify-center items-center space-x-4">
+				<AdvanceStep
+					progress={nextStep}
+					optimalSteps={optimalSteps}
+					manifest={manifest}
+					start={getMoves}
+					currentStep={currentStep}
+				/>
+				<DisplayInstructions
+					optimalSteps={optimalSteps}
+					currentStep={currentStep}
+					manifest={manifest}
+				/>
+			</div>
 		</div>
 	);
 };
