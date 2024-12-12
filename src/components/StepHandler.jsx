@@ -17,7 +17,7 @@ const StepHandler = ({
 	setCurrentStep,
 	setOptimalSteps,
 	setDone,
-}) => {
+}) => { 
 	const [currentTime, setCurrentTime] = useState(0);
 	const [generatedCost, setGeneratedCost] = useState(0);
 
