@@ -19,6 +19,11 @@ const UnloadLoadPrompt = ({
 			setMessage("Please enter a container name");
 			return;
 		}
+		if (inputText === "NAN")
+		{
+			setMessage("Container name cannot be 'NAN'");
+			return;
+		}
 
 		// Check for non-printable ASCII characters
 		const nonPrintableAscii = /[\x00-\x1F\x7F]/;

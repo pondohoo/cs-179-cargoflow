@@ -1,7 +1,6 @@
 import GridSquare from "./GridSquare"
 
 const PinkSquareAboveBuffer = ({ currentStep }) => {
-  console.log("currentStep is now for pinksquareabovebuffer", currentStep);
   const entry = {
     row: 14,
     col: 38,
