@@ -18,7 +18,8 @@ const StepHandler = ({
 	setOptimalSteps,
 	setDone,
 }) => {
-	const [operationDuration, setOperationDuration] = useState(0);
+	const [currentTime, setCurrentTime] = useState(0);
+	const [generatedCost, setGeneratedCost] = useState(0);
 
 	const getMoves = () => {
 		if (manifest === null) {
@@ -26,20 +27,19 @@ const StepHandler = ({
 		}
 		const startTime = performance.now();
 		let generatedOptimalSteps;
-		let generatedCost;
 		if (operation === "rebalance") {
 			const generatedOptimalStepsAndCost = rebalance(manifest);
 			const { listOfMoves, cost } = generatedOptimalStepsAndCost;
 			generatedOptimalSteps = listOfMoves;
-			generatedCost = cost;
+			console.log("generatedCost is", cost);
+			setGeneratedCost(cost);
 		} else {
 			const generatedOptimalStepsAndCost = loadUnload(manifest, containersToLoad, containersToUnload);
 			const { listOfMoves, cost } = generatedOptimalStepsAndCost;
 			generatedOptimalSteps = listOfMoves;
-			generatedCost = cost;
+			setGeneratedCost(cost);
 		}
-		const endTime = performance.now();
-		setOperationDuration(endTime - startTime);
+		setCurrentTime(Date.now());
 		setOptimalSteps(generatedOptimalSteps);
 		setCurrentStep([0, generatedOptimalSteps[0]]);
 		console.log("optimalSteps", generatedOptimalSteps);
@@ -101,15 +101,10 @@ const StepHandler = ({
 		setCurrentStep([currentStep[0] + 1, optimalSteps[currentStep[0] + 1]]);
 	};
 	
-	const formatDuration = (duration) => {
-		const minutes = Math.floor(duration / 60000);
-		const seconds = ((duration % 60000) / 1000).toFixed(2);
-		return `${minutes}m ${seconds}s`;
-	};
 
 	return (
 		<div>
-			<p>Operation Duration: {formatDuration(operationDuration)}</p>
+			{generatedCost > 0 && <p>Finish Time: {new Date(currentTime + generatedCost * 60000).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</p>}
 			<div className="flex justify-center items-center space-x-4">
 				<AdvanceStep
 					progress={nextStep}

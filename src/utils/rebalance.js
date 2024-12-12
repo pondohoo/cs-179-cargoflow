@@ -3,7 +3,7 @@
 // General function to rebalance the manifest:
 // First Run Greedy, if it doesn't work, run SIFT, else if time permits, run Normal
 const rebalance = (manifest) => {
-	const cost = 0;
+	const cost = 3;
 	const listOfMoves = greedy(manifest);
 	const listOfMovesAndCost = { listOfMoves, cost }
 	return listOfMovesAndCost;
@@ -329,7 +329,7 @@ const bufempty = (manifest) => {
 
 const greedy = (manifest) => {
 	const start = performance.now();
-	const totalTimeLimit = 0.5 * 60 * 1000; // 15 minutes
+	const totalTimeLimit = 15 * 60 * 1000; // 15 minutes
 
 	let listOfMoves = [];
 
