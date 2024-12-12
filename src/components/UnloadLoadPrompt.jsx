@@ -90,21 +90,21 @@ const UnloadLoadPrompt = ({
 
 					<div className="flex">
 						<button
-							className="bg-ibm-blue text-white font-bold py-2 px-4 rounded mt-2"
+							className="bg-ibm-blue text-black font-bold py-2 px-4 rounded mt-2"
 							type="submit"
 						>
 							Submit container
 						</button>
 
 						<button
-							className="bg-ibm-blue  text-white font-bold py-2 px-4 rounded mt-2"
+							className="bg-ibm-blue  text-black font-bold py-2 px-4 rounded mt-2"
 							type="button"
 							onClick={handleSwitchUnloadLoad}
 						>
 							{isUnloadContainer ? "Switch to Load" : "Switch to Unload"}
 						</button>
 						<button
-							className="bg-ibm-blue text-white font-bold py-2 px-4 rounded mt-2"
+							className="bg-ibm-blue text-black font-bold py-2 px-4 rounded mt-2"
 							type="button"
 							onClick={handleFinish}
 						>

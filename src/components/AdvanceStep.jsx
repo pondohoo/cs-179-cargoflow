@@ -16,11 +16,11 @@ const AdvanceStep = ({ start, currentStep, progress }) => {
 	return (
 		<>
 			{!inProgress ? (
-				<button onClick={handleStart} className="bg-ibm-yellow p-2 text-black">
+				<button onClick={handleStart} className="px-4 py-2 bg-ibm-yellow text-black font-medium rounded shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300">
 					Start
 				</button>
 			) : ( currentStep ? (
-				<button onClick={progress} className="bg-ibm-yellow p-2 text-black">
+				<button onClick={progress} className="px-4 py-2 bg-ibm-yellow text-black font-medium rounded shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300">
 					Progress
 				</button> ) : ( console.log("fweiufhewiufhewfhewuifhewifuhweuifw"))
 			)}

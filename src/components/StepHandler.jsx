@@ -101,10 +101,16 @@ const StepHandler = ({
 		setCurrentStep([currentStep[0] + 1, optimalSteps[currentStep[0] + 1]]);
 	};
 	
+	const formatDuration = (duration) => {
+		const minutes = Math.floor(duration / 60000);
+		const seconds = ((duration % 60000) / 1000).toFixed(2);
+		return `${minutes}m ${seconds}s`;
+	};
+
 	return (
 		<div>
-			<p>Operation Duration: {operationDuration.toFixed(2)} ms</p>
-			<div className="flex justify-center">
+			<p>Operation Duration: {formatDuration(operationDuration)}</p>
+			<div className="flex justify-center items-center space-x-4">
 				<AdvanceStep
 					progress={nextStep}
 					optimalSteps={optimalSteps}

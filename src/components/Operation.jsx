@@ -65,7 +65,7 @@ const Operation = ({ operation }) => {
 						{done && (
 							<div className="flex justify-center">
 								<button
-									className="bg-ibm-yellow p-2 text-black"
+									className="px-4 py-2 bg-ibm-yellow text-black font-medium rounded shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300"
 									onClick={handleFinish}
 								>
 									Finish
@@ -88,7 +88,7 @@ const Operation = ({ operation }) => {
 						{done && (
 							<div className="flex justify-center">
 								<button
-									className="bg-ibm-yellow p-2 text-black"
+									className="px-4 py-2 bg-ibm-yellow text-black font-medium rounded shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300"
 									onClick={handleFinish}
 								>
 									Finish
@@ -100,7 +100,7 @@ const Operation = ({ operation }) => {
 			) : !readyToExport ? (
 				<div className="flex justify-center">
 					<button
-						className="bg-ibm-yellow p-2 text-black"
+						className="px-4 py-2 bg-ibm-yellow text-black font-medium rounded shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300"
 						onClick={handleFinish}
 					>
 						Finish
