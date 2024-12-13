@@ -1,3 +1,4 @@
+import addLogEntry from "@/utils/addLogEntry";
 import wipeState from "@/utils/wipeState";
 import { useState } from "react";
 
@@ -38,6 +39,7 @@ const ExportManifest = ({ manifest, shipName }) => {
         link.click();
         document.body.removeChild(link);
 
+        addLogEntry("Finished a cycle. Manifest " +shipName + " was written to desktop, and a reminder pop-up to operator to send file was displayed.");
 
     };
 
