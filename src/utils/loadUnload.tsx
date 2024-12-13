@@ -84,6 +84,10 @@ function findLowestCostUnload(
   );
 
   let index: number = containersToUnload.findIndex((s) => {
+    console.log("taco FINDING LOWEST COST UNLOAD")
+    console.log(containersToUnload)
+    console.log(costs)
+    console.log(costs[0])
     return s == costs[0].name;
   });
   return { row: costs[0].row, col: costs[0].col, index: index };
@@ -212,10 +216,10 @@ function findBestCoordsToMoveBlockingContainer(
 function moveBlockingContainers(
   row: number,
   col: number,
-  grid: ManifestEntry[][],
+  originalGrid: ManifestEntry[][],
   containersToUnload: string[]
 ): [ManifestEntry[][], number[][][]] {
-  console.log("taco in movingblockingcontainers");
+  let grid: ManifestEntry[][] = JSON.parse(JSON.stringify(originalGrid));
   let listOfMoves: number[][][] = [];
   // Check if there are any blocking containers above target container.
   if (
@@ -285,9 +289,10 @@ function unload(
   col: number,
   armRow: number,
   armCol: number,
-  grid: ManifestEntry[][]
+  originalGrid: ManifestEntry[][]
 ): [ManifestEntry[][], number[][][]] {
   let moves: number[][][] = [];
+  let grid: ManifestEntry[][] = JSON.parse(JSON.stringify(originalGrid));
 
   // Move arm to unload container coords if it is not there already.
   if (!(row == armRow && col == armCol)) {
@@ -297,15 +302,9 @@ function unload(
     ]);
   }
 
-  // Move from target unload container to ship grid pink slot (13, 37).
+  // Move from target unload container coords to loading truck slot (15, 39).
   moves.push([
     [row + 1, col + 1],
-    [13, 37],
-  ]);
-
-  // Move from ship grid pink slot (13, 37) to loading truck slot (15, 39).
-  moves.push([
-    [13, 37],
     [15, 39],
   ]);
 
@@ -361,21 +360,17 @@ const loadDest = (
 
 const loadUnload = (
   manifest,
-  containersToLoad,
-  containersToUnload
+  containersToLoad: string[],
+  containersToUnload: string[]
 ): number[][][] => {
   let grid: ManifestEntry[][] = parseManifestToGrid(manifest);
   let listOfMoves: number[][][] = [];
 
-  console.log("taco before unload while loop");
-  console.log(containersToUnload.length);
   while (containersToUnload.length > 0 && containersToLoad.length > 0) {
     // Find lowest cost unload.
     let lowestCostUnloadCoords: { row: number; col: number; index: number } =
       findLowestCostUnload(grid, containersToUnload);
-    console.log(`taco lowest cost ${lowestCostUnloadCoords}`);
 
-    console.log("taco moving blocking boxes");
     // Move blocking boxes above target unload box if they exist.
     let [updatedGridAfterBlockingContainers, blockingContainerMoves]: [
       ManifestEntry[][],
@@ -390,8 +385,6 @@ const loadUnload = (
     for (const move of blockingContainerMoves) {
       listOfMoves.push(move);
     }
-    console.log("taco finished moving blocking boxes");
-    console.log(listOfMoves);
 
     // Unload.
     let armRow: number = lowestCostUnloadCoords.row;
@@ -414,7 +407,7 @@ const loadUnload = (
     for (const move of unloadMoves) {
       listOfMoves.push(move);
     }
-    containersToUnload.pop(lowestCostUnloadCoords.index);
+    containersToUnload.splice(lowestCostUnloadCoords.index, 1);
 
     // Attempt load.
   }
@@ -422,12 +415,13 @@ const loadUnload = (
   while (containersToLoad.length > 0) {}
 
   while (containersToUnload.length > 0) {
+    console.log("taco unload while loop")
+    console.log(containersToUnload)
+    console.log(grid)
     // Find lowest cost unload.
     let lowestCostUnloadCoords: { row: number; col: number; index: number } =
       findLowestCostUnload(grid, containersToUnload);
-    console.log(`taco lowest cost ${lowestCostUnloadCoords}`);
 
-    console.log("taco moving blocking boxes");
     // Move blocking boxes above target unload box if they exist.
     let [updatedGridAfterBlockingContainers, blockingContainerMoves]: [
       ManifestEntry[][],
@@ -442,8 +436,6 @@ const loadUnload = (
     for (const move of blockingContainerMoves) {
       listOfMoves.push(move);
     }
-    console.log("taco finished moving blocking boxes");
-    console.log(listOfMoves);
 
     // Unload.
     let armRow: number = lowestCostUnloadCoords.row;
@@ -466,31 +458,12 @@ const loadUnload = (
     for (const move of unloadMoves) {
       listOfMoves.push(move);
     }
-    containersToUnload.pop(lowestCostUnloadCoords.index);
+    console.log("taco popping from unload list")
+    containersToUnload.splice(lowestCostUnloadCoords.index, 1);
+    console.log(containersToUnload);
   }
 
-  console.log("taco unload finished");
-  console.log(listOfMoves);
   return listOfMoves;
-  // const listOfMoves = [
-  //   [
-  //     [2, 6],
-  //     [2, 1],
-  //   ],
-  //   [
-  //     [1, 6],
-  //     [2, 12],
-  //   ],
-  //   [
-  //     [2, 5],
-  //     [2, 11],
-  //   ],
-  //   [
-  //     [1, 5],
-  //     [3, 11],
-  //   ],
-  // ]; // move [2, 6] to [2, 1], then [1, 6] to [2, 12], etc.
-  // return listOfMoves;
 };
 
 export default loadUnload;

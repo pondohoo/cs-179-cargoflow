@@ -20,6 +20,3 @@ export default function parseManifestToGrid(
 
   return grid;
 }
-
-export function modifyManifestGrid(grid: Manifest[][], manifest: ManifestEntry[]): ManifestEntry[] {
-}
