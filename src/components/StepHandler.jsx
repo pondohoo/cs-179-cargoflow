@@ -126,7 +126,7 @@ const StepHandler = ({
           )}
         </p>
       )}
-      <div className="flex justify-center items-center space-x-4">
+      <div className="flex justify-center items-center space-x-4 mt-10">
         <AdvanceStep
           progress={nextStep}
           optimalSteps={optimalSteps}
