@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import UploadManifest from "./UploadManifest";
 
-import StepHandler from "./StepHandler";
 import UnloadLoad from "./UnloadLoad";
 import Rebalance from "./Rebalance";
 import ExportManifest from "./ExportManifest";
@@ -32,7 +31,7 @@ const Operation = ({ operation }) => {
 		if (manifest) {
 			localStorage.setItem("manifest", JSON.stringify(manifest));
 		}
-    if (optimalSteps) {
+    	if (optimalSteps) {
 			localStorage.setItem("optimalSteps", JSON.stringify(optimalSteps));
 		}
 		if (currentStep) {
