@@ -122,7 +122,7 @@ const Submission = () => {
 						The website&#39;s storage capacity is limited, and running a complex
 						A*&#10;search for a certain amount of time tends to exceed it,
 						causing the&#10;function to pause and stop running. To address this,
-						we reduced the&#10;time limit from 15 minutes to 3 minutes. While
+						we reduced the&#10;time limit from 15 minutes to 5 minutes. While
 						this change prevents&#10;the website from pausing, it also results
 						in a potential less optimal&#10;output.
 					</li>
