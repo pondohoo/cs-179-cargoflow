@@ -11,6 +11,7 @@ const wipeState = () => {
 	localStorage.removeItem("containersToUnload");
 	localStorage.removeItem("done");
 	localStorage.removeItem("shipName");
+	localStorage.removeItem("finishTime");
 	console.log("operation wiped");
 };
 

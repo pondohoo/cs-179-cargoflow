@@ -17,8 +17,22 @@ const StepHandler = ({
   setOptimalSteps,
   setDone,
 }) => {
-  const [currentTime, setCurrentTime] = useState(0);
-  const [generatedCost, setGeneratedCost] = useState(0);
+  const [currentTime, setCurrentTime] = useState(() => {
+		const savedCurrentTime = localStorage.getItem("currentTime");
+		return savedCurrentTime ? JSON.parse(savedCurrentTime) : null;
+	});
+  const [generatedCost, setGeneratedCost] = useState(() => {
+		const savedGeneratedCost = localStorage.getItem("generatedCost");
+		return savedGeneratedCost ? JSON.parse(savedGeneratedCost) : null;
+	});
+
+  useEffect(() => {
+	if (currentTime) {
+		localStorage.setItem("currentTime", JSON.stringify(currentTime));
+	}
+	if (generatedCost) {
+		localStorage.setItem("generatedCost", JSON.stringify(generatedCost));
+	}},[currentTime,generatedCost])
 
   const getMoves = () => {
     if (manifest === null) {
