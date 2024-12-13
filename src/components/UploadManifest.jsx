@@ -1,4 +1,5 @@
 "use client";
+import addLogEntry from "@/utils/addLogEntry";
 import React, { useState } from "react";
 
 const UploadManifest = ({ setManifest, setShipName }) => {
@@ -12,9 +13,11 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 			reader.readAsText(file);
 		});
 	};
-	const formatManifest = (content) => {
+	const formatManifest = (content, fileName) => {
 		const lines = content.split("\n");
 		const result = [];
+
+		let counter = 0;
 
 		lines.forEach((line) => {
 			const [rowString, colString, weightString, nameString] = line.split(",");
@@ -23,6 +26,10 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 			const col = parseInt(colString.trim().slice(0, -1), 10);
 			const name = nameString.trim();
 			const weight = parseInt(weightString.trim().slice(1, -1));
+
+			if (name !== "UNUSED" && name !== "NAN") {
+				counter++;
+			}
 
 			console.log("row", row, "col", col);
 
@@ -33,6 +40,7 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 				name,
 			});
 		});
+		addLogEntry("Manifest " + fileName + " is opened, there are " + counter + " containers on the ship");
 		// Create rows for buffer.
 		for (let row = 9; row <= 12; row++) {
 			for (let col = 13; col <= 36; col++) {
@@ -79,7 +87,7 @@ const UploadManifest = ({ setManifest, setShipName }) => {
 
 		readFileContent(file)
 			.then((content) => {
-				const manifest = formatManifest(content);
+				const manifest = formatManifest(content, file.name);
 				console.log("manifest is", manifest);
 				setManifest(manifest);
 			})
