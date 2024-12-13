@@ -3,10 +3,7 @@
 // General function to rebalance the manifest:
 // First Run Greedy, if it doesn't work, run SIFT, else if time permits, run Normal
 const rebalance = (manifest) => {
-	const cost = 3;
-	const listOfMoves = greedy(manifest);
-	const listOfMovesAndCost = { listOfMoves, cost }
-	return listOfMovesAndCost;
+	return greedy(manifest);
 };
 
 
@@ -329,13 +326,12 @@ const bufempty = (manifest) => {
 
 const greedy = (manifest) => {
 	const start = performance.now();
-	const totalTimeLimit = 15 * 60 * 1000; // 15 minutes
+	const totalTimeLimit = 3 * 60 * 1000; // 3 minutes
 
 	let listOfMoves = [];
 
 	let curbestmove =[];
 
-	//update to 96 after we get a 9th row
 	let crane = 84; 
 
 	//cost of saved movemnts
@@ -361,9 +357,9 @@ const greedy = (manifest) => {
 				const remainingTime = totalTimeLimit - greedyTime;
 				if (remainingTime <= 0) {
 					console.warn("No time left after running greedy. Returning greedy solution.");
-					return listOfMoves;
+					return greedtsiftresult;
 				}
-				 //change to sift after we make it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 				let result = sift(manifest, remainingTime);
 				if(result != null){
 					return result;
@@ -496,16 +492,15 @@ const greedy = (manifest) => {
 
 	if (remainingTime <= 0) {
 		console.warn("No time left after running greedy. Returning greedy solution.");
-		return listOfMoves;
+		return [listOfMoves, cost];
 	}
 
 	let result = normal(manifest, remainingTime);
-	console.log("result:", result);
 	if(result != null){
-		console.log("correct return result:", result);
+		console.log("normal result:", result);
 		return result;
 	}
-	return listOfMoves;
+	return [listOfMoves, cost];
 }
 
 const greedySift = (manifest) => {
@@ -602,7 +597,7 @@ const greedySift = (manifest) => {
 			}
 		}
 	}
-	return listOfMoves;
+	return [listOfMoves, cost];
 }
 
 function generateHash(manifest) {
@@ -648,7 +643,7 @@ const normal = (manifest, remainingTime) => {
 		let parentBal = balanceCheck(parent[0]);
 		console.log("cost: ", parent[1], " g: ", parent[4], " bal: ", parentBal[0], " move: ", parent[2][0]);
 		if (parentBal[0] <= 10 && bufempty(parent[0])) {
-			return parent[2];
+			return [parent[2], parent[1]];
 		}
 
 		closedSet.set(currentHash, parent);
@@ -817,7 +812,7 @@ const sift = (manifest, remainingTime) => {
 		let siftBalanced = siftHeuristic(parent[0], goalState, emptyManifest);
 		console.log("cost: ", parent[1], " g: ", parent[4], " h: ", siftBalanced, " move: ", parent[2][0]);
 		if (siftBalanced == 0 && bufempty(parent[0])) {
-			return parent[2];
+			return [parent[2], parent[1]];
 		}
 		closedSet.set(currentHash, parent);
 

@@ -26,11 +26,13 @@ const StepHandler = ({
       throw new Error("No manifest found");
     }
     const startTime = performance.now();
-    let generatedOptimalSteps;
+	  let generatedOptimalSteps;
+	  let cost;
     if (operation === "rebalance") {
-      const generatedOptimalStepsAndCost = rebalance(manifest);
-      const { listOfMoves, cost } = generatedOptimalStepsAndCost;
-      generatedOptimalSteps = listOfMoves;
+	  const generatedOptimalStepsAndCost = rebalance(manifest);
+	  generatedOptimalSteps = generatedOptimalStepsAndCost[0];
+	  cost = generatedOptimalStepsAndCost[1];
+	  console.log("generatedOptimalSteps is", generatedOptimalSteps);
       console.log("generatedCost is", cost);
       setGeneratedCost(cost);
     } else {
@@ -46,8 +48,6 @@ const StepHandler = ({
     setCurrentTime(Date.now());
     setOptimalSteps(generatedOptimalSteps);
     setCurrentStep([0, generatedOptimalSteps[0]]);
-    console.log("optimalSteps", generatedOptimalSteps);
-    console.log("currentstep first step is", [0, generatedOptimalSteps[0]]);
   };
 
   const handleManifestUpdate = () => {
