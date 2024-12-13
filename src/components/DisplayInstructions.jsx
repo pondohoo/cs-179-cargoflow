@@ -13,6 +13,10 @@ const DisplayInstructions = ({ optimalSteps, currentStep, manifest }) => {
 
     console.log("DisplayInstructions optimalSteps", optimalSteps);
     console.log("DisplayInstructions currentStep", currentStep);
+    const currentStepIndex = optimalSteps?.findIndex(
+        (step) => JSON.stringify(step) === JSON.stringify(currentStep?.[1])
+    )
+    console.log("CURRENTSTEP INDEX", currentStepIndex);
 
     return (
         <div>
@@ -27,7 +31,7 @@ const DisplayInstructions = ({ optimalSteps, currentStep, manifest }) => {
                     <h3 className="font-bold text-ibm-pink text-lg mt-2">Upcoming Instruction(s):</h3>
                     <ol className="list-decimal ml-4 pl-5 space-y-2">
                         {optimalSteps && optimalSteps
-                            .slice(optimalSteps.indexOf(currentStep[1]) + 1)
+                            .slice(currentStepIndex + 1)
                             .map((step, index) => {
                             const currCol = step[0][1];
                             const currRow = step[0][0];
