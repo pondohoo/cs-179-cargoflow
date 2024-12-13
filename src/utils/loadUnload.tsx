@@ -84,10 +84,6 @@ function findLowestCostUnload(
   );
 
   let index: number = containersToUnload.findIndex((s) => {
-    console.log("taco FINDING LOWEST COST UNLOAD")
-    console.log(containersToUnload)
-    console.log(costs)
-    console.log(costs[0])
     return s == costs[0].name;
   });
   return { row: costs[0].row, col: costs[0].col, index: index };
@@ -211,6 +207,58 @@ function findBestCoordsToMoveBlockingContainer(
   return { row: second_pass_best_row, col: second_pass_best_col };
 }
 
+function findBestLoadCoords(
+  grid: ManifestEntry[][],
+  containersToUnload: string[]
+): { row: number; col: number } {
+  const containersToUnloadSet: Set<string> = new Set<string>(
+    containersToUnload
+  );
+  for (let c: number = 0; c < 12; c++) {
+    for (let r: number = 0; r < 8; r++) {
+      if (containersToUnloadSet.has(grid[r][c].name)) {
+        continue;
+      }
+
+      if (grid[r][c].name == "UNUSED") {
+        return { row: r, col: c };
+      }
+    }
+  }
+
+  return { row: -1, col: -1 };
+}
+
+// Return the updated grid and set of moves after loading a container onto the ship grid.
+function load(
+  row: number,
+  col: number,
+  name: string,
+  originalGrid: ManifestEntry[][],
+  listOfMoves: number[][][]
+): [ManifestEntry[][], number[][][]] {
+  let updatedGrid: ManifestEntry[][] = JSON.parse(JSON.stringify(originalGrid));
+  let moves: number[][][] = [];
+
+  // Check if most recent to move is not already at truck cell, then move to truck cell first.
+  if (listOfMoves.length > 0) {
+    let prevToCoord: number[] = listOfMoves[listOfMoves.length - 1][1];
+    if (!(prevToCoord[0] == 15 && prevToCoord[1] == 39)) {
+      moves.push([prevToCoord, [15, 39]]);
+    }
+  }
+
+  // Move from truck cell (15, 39) to target cell.
+  moves.push([
+    [15, 39],
+    [row + 1, col + 1],
+  ]);
+
+  updatedGrid[row][col].name = name;
+
+  return [updatedGrid, moves];
+}
+
 // Given the coordinates of a container to unload, moves all blocking containers above to another available column with no unload containers. In the case that all columns have unload containers, move blocking containers to nearest available column. Returns the updated grid after moving the blockinb containers and the formatted set of moves..
 function moveBlockingContainers(
   row: number,
@@ -221,18 +269,12 @@ function moveBlockingContainers(
   let grid: ManifestEntry[][] = JSON.parse(JSON.stringify(originalGrid));
   let listOfMoves: number[][][] = [];
   // Check if there are any blocking containers above target container.
-  if (
-    row + 1 < 8 &&
-    (grid[row + 1][col].name == "UNUSED")
-  ) {
+  if (row + 1 < 8 && grid[row + 1][col].name == "UNUSED") {
     return [grid, listOfMoves];
   } else {
     let blockingContainers: { row: number; col: number }[] = [];
     let i: number = row + 1;
-    while (
-      i < 8 &&
-      grid[i][col].name != "UNUSED"
-    ) {
+    while (i < 8 && grid[i][col].name != "UNUSED") {
       blockingContainers.push({ row: i, col: col });
       i += 1;
     }
@@ -358,11 +400,17 @@ const loadDest = (
 
 const loadUnload = (
   manifest,
-  containersToLoad: string[],
-  containersToUnload: string[]
+  originalContainersToLoad: string[],
+  originalContainersToUnload: string[]
 ): number[][][] => {
   let grid: ManifestEntry[][] = parseManifestToGrid(manifest);
   let listOfMoves: number[][][] = [];
+  let containersToUnload: string[] = JSON.parse(
+    JSON.stringify(originalContainersToUnload)
+  );
+  let containersToLoad: string[] = JSON.parse(
+    JSON.stringify(originalContainersToLoad)
+  );
 
   while (containersToUnload.length > 0 && containersToLoad.length > 0) {
     // Find lowest cost unload.
@@ -408,14 +456,48 @@ const loadUnload = (
     containersToUnload.splice(lowestCostUnloadCoords.index, 1);
 
     // Attempt load.
+    const bestLoadCoords: { row: number; col: number } = findBestLoadCoords(
+      grid,
+      containersToUnload
+    );
+    if (!(bestLoadCoords.row == -1 && bestLoadCoords.col == -1)) {
+      const [updatedGrid, loadMoves]: [ManifestEntry[][], number[][][]] = load(
+        bestLoadCoords.row,
+        bestLoadCoords.col,
+        containersToLoad[0],
+        grid,
+        listOfMoves
+      );
+      containersToLoad.splice(0, 1);
+      grid = updatedGrid;
+      for (const move of loadMoves) {
+        listOfMoves.push(move);
+      }
+    }
   }
 
-  while (containersToLoad.length > 0) {}
+  while (containersToLoad.length > 0) {
+    const bestLoadCoords: { row: number; col: number } = findBestLoadCoords(
+      grid,
+      containersToUnload
+    );
+    if (!(bestLoadCoords.row == -1 && bestLoadCoords.col == -1)) {
+      const [updatedGrid, loadMoves]: [ManifestEntry[][], number[][][]] = load(
+        bestLoadCoords.row,
+        bestLoadCoords.col,
+        containersToLoad[0],
+        grid,
+        listOfMoves
+      );
+      containersToLoad.splice(0, 1);
+      grid = updatedGrid;
+      for (const move of loadMoves) {
+        listOfMoves.push(move);
+      }
+    }
+  }
 
   while (containersToUnload.length > 0) {
-    console.log("taco unload while loop")
-    console.log(containersToUnload)
-    console.log(grid)
     // Find lowest cost unload.
     let lowestCostUnloadCoords: { row: number; col: number; index: number } =
       findLowestCostUnload(grid, containersToUnload);
@@ -456,7 +538,7 @@ const loadUnload = (
     for (const move of unloadMoves) {
       listOfMoves.push(move);
     }
-    console.log("taco popping from unload list")
+    console.log("taco popping from unload list");
     containersToUnload.splice(lowestCostUnloadCoords.index, 1);
     console.log(containersToUnload);
   }
