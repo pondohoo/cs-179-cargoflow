@@ -14,17 +14,18 @@ const DownloadLogs = () => {
     const storeName = "cargoflowLogs" + new Date().getFullYear();
     const dbRequest = indexedDB.open(databaseName, 1);
 
-    dbRequest.onerror = () => {
-      setErrorMessage("Error opening database.");
+    dbRequest.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      
+      if (!event.oldVersion) {
+        setErrorMessage("No logs found for the current year.");
+        db.close();
+        indexedDB.deleteDatabase(databaseName);
+      }
     };
 
     dbRequest.onsuccess = (event) => {
       const db = event.target.result;
-
-      if(!db.objectStoreNames.contains(storeName)) {
-        setErrorMessage("No logs found for the current year.");
-        return;
-      }
 
       const transaction = db.transaction(storeName, "readonly");
       const objectStore = transaction.objectStore(storeName);
