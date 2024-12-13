@@ -49,7 +49,7 @@ const Operation = ({ operation }) => {
 		if (shipName) {
 			localStorage.setItem("shipName", shipName);
 		}
-	}, [manifest, optimalSteps, currentStep, shipName]);
+	}, [manifest, optimalSteps, currentStep, shipName,done]);
 
 	const handleFinish = () => {
 		setReadyToExport(true);
