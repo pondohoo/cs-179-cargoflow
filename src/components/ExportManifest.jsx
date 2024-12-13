@@ -39,7 +39,7 @@ const ExportManifest = ({ manifest, shipName }) => {
         link.click();
         document.body.removeChild(link);
 
-        addLogEntry("Finished a cycle. Manifest " +shipName + " was written to desktop, and a reminder pop-up to operator to send file was displayed.");
+        addLogEntry("Finished a Cycle. Manifest " + filename + " was written to desktop, and a reminder pop-up to operator to send file was displayed.");
 
     };
 

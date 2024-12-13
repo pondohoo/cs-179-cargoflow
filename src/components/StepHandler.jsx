@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import AdvanceStep from "./AdvanceStep";
 import DisplayInstructions from "./DisplayInstructions";
+import addLogEntry from "@/utils/addLogEntry";
 
 import loadUnload from "@/utils/loadUnload";
 import rebalance from "@/utils/rebalance";
-import addLogEntry from "@/utils/addLogEntry";
 
 const StepHandler = ({
   manifest,
@@ -25,7 +25,12 @@ const StepHandler = ({
   const [generatedCost, setGeneratedCost] = useState(() => {
 		const savedGeneratedCost = localStorage.getItem("generatedCost");
 		return savedGeneratedCost ? JSON.parse(savedGeneratedCost) : null;
-	});
+  });
+  const [showWeightPopup, setShowWeightPopup] = useState(false);
+  const [containerWeight, setContainerWeight] = useState("");
+  const [pendingEntry, setPendingEntry] = useState(null);
+  const [loadUnloadOperationList, setLoadUnloadOperationList] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
 	if (currentTime) {
@@ -55,19 +60,29 @@ const StepHandler = ({
         containersToLoad,
         containersToUnload
       );
-      const listOfMoves = generatedOptimalStepsAndCost;
-      generatedOptimalSteps = listOfMoves;
-      // setGeneratedCost(cost);
+      generatedOptimalSteps = generatedOptimalStepsAndCost[0];
+      cost = generatedOptimalStepsAndCost[2];
+      setGeneratedCost(cost);
+      setLoadUnloadOperationList(generatedOptimalStepsAndCost[1]);
     }
     setCurrentTime(Date.now());
     setOptimalSteps(generatedOptimalSteps);
     setCurrentStep([0, generatedOptimalSteps[0]]);
   };
 
-  const handleManifestUpdate = () => {
+  let loadPointer = 0;
+  const alignedList = loadUnloadOperationList.map((value) => {
+    if (value === 1 && loadPointer < containersToLoad.length) {
+      return containersToLoad[loadPointer++];
+    }
+    return "";
+  })
+  console.log("alignedList", alignedList);
+
+  const nextStep = () => {
     const currentCol = currentStep[1][0][1];
     const currentRow = currentStep[1][0][0];
-    const currentEntry = (currentRow - 1) * 12 + (currentCol - 1);
+    const currentEntry = currentRow == 15 && currentCol == 39 ? 194 : (currentRow - 1) * 12 + (currentCol - 1);
     const currentWeight = manifest[currentEntry].weight;
     const currentName = manifest[currentEntry].name;
     console.log(
@@ -86,18 +101,32 @@ const StepHandler = ({
     const nextEntry = (nextRow - 1) * 12 + (nextCol - 1);
     console.log("nextCol", nextCol, "nextRow", nextRow);
     const newManifest = [...manifest];
+    // const newManifest = JSON.parse(JSON.stringify(manifest));
     console.log("newManifest", newManifest);
 
-	if (manifest[nextEntry].name == "UNUSED")
-		{ 
-			addLogEntry("\"" + currentName + "\"" + " moved from position [" + currentRow + "," + currentCol + "] to position [" + nextRow + "," + nextCol + "]");
-		}
 
-    if (!(
-      manifest[nextEntry] &&
-      currentName != "UNUSED" &&
-      manifest[nextEntry].name != "UNUSED"
-    )) {
+    // [truck, unused] [truck, ship], [ship, truck], [ship, ship], [ship, unused] (blocking)
+
+    // list: [load=1, unload=0, crane=-1, blocking/balancing=-2]
+
+    // ONLY LOADS: [truck, unused](load) [ship, truck](crane) [truck, unused](load) 
+    // ONLY UNLOADS: [ship, truck](unload) [truck, ship](crane) [ship, truck](unload)
+
+    // loadUnloadList:    [1, 0, 1, -1, 0, -2]
+    // containersToLoad:  [A, x, B,  x, x,  x]
+
+    if (loadUnloadOperationList[currentStep[0]] === 1) { // load (set to to containerstoload[0])      
+      addLogEntry(`"${alignedList[currentStep[0]]}" is onloaded.`);
+      setShowWeightPopup(true);
+      setPendingEntry({
+        nextEntry,
+        nextRow,
+        nextCol,
+        containerName: alignedList[currentStep[0]],
+      });
+      return;
+    } else if (loadUnloadOperationList[currentStep[0]] === 0) { // unload (set from to UNUSED)
+      addLogEntry(`"${currentName}" is offloaded.`);
       newManifest[currentEntry] = {
         ...newManifest[currentCol - currentRow],
         name: "UNUSED",
@@ -105,22 +134,57 @@ const StepHandler = ({
         row: currentRow,
         col: currentCol,
       };
-			if (!(nextRow == 15 && nextCol == 39)) {
-				newManifest[nextEntry] = {
-					...newManifest[nextCol - nextRow],
-					name: currentName,
-					weight: currentWeight,
-					row: nextRow,
-					col: nextCol,
-				};
-			}
+    } else if (loadUnloadOperationList[currentStep[0]] !== -1) { // balance/blocking (swap)
+      addLogEntry(`"${currentName}" is moved from [ ${currentRow} , ${currentCol} ] to [ ${nextRow} , ${nextCol} ].`);
+      newManifest[currentEntry] = {
+        ...newManifest[currentCol - currentRow],
+        name: "UNUSED",
+        weight: 0,
+        row: currentRow,
+        col: currentCol,
+      };
+      newManifest[nextEntry] = {
+        ...newManifest[nextCol - nextRow],
+        name: currentName,
+        weight: currentWeight,
+        row: nextRow,
+        col: nextCol,
+      };
     }
-
-    return newManifest;
+    setManifest(newManifest);
+    moveToNextStep();
   };
 
-  const nextStep = () => {
-    setManifest(handleManifestUpdate);
+  const handleWeightSubmit = (event) => {
+    event.preventDefault();
+    if (!containerWeight.trim()) {
+      setErrorMessage("Please enter container weight.");
+      return;
+    }
+    if (containerWeight.length > 5) {
+      setErrorMessage("Container weight should not exceed 5 digits.");
+      return;
+    }
+    if (pendingEntry) {
+      const { nextEntry, nextRow, nextCol, containerName } = pendingEntry;
+      const newManifest = [...manifest];
+      newManifest[nextEntry] = {
+        ...newManifest[nextCol - nextRow],
+        name: containerName,
+        weight: containerWeight,
+        row: nextRow,
+        col: nextCol,
+      };
+      setManifest(newManifest);
+      setContainerWeight("");
+      setPendingEntry(null);
+      setShowWeightPopup(false);
+      setErrorMessage("");
+      moveToNextStep();
+    }
+  };
+
+  const moveToNextStep = () => {
     console.log("currentStep", currentStep);
     if (
       currentStep[0] === optimalSteps.length - 1 ||
@@ -131,11 +195,37 @@ const StepHandler = ({
       setDone(true);
       return;
     }
-    setCurrentStep([currentStep[0] + 1, optimalSteps[currentStep[0] + 1]]);
+  
+    const nextIndex = currentStep[0] + 1;
+    console.log("nextIndex", nextIndex);
+    setCurrentStep([nextIndex, optimalSteps[nextIndex]]);
   };
 
   return (
     <div>
+      {showWeightPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-xl text-ibm-gray font-bold mb-4">Container Weight</h2>
+            <input
+              type="number"
+              placeholder="Enter container weight"
+              value={containerWeight}
+              onChange={(e) => setContainerWeight(e.target.value)}
+              className="border border-gray-300 text-black rounded-lg px-4 py-2 mb-4 w-full"
+            />
+            {errorMessage && (
+              <p className="text-red-500 text-sm mb-4">{errorMessage}</p>
+            )}
+            <button
+              onClick={handleWeightSubmit}
+              className="px-4 py-2 bg-ibm-green text-black font-medium rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      )}
       {generatedCost > 0 && (
         <p>
           Finish Time:{" "}
@@ -157,6 +247,7 @@ const StepHandler = ({
           optimalSteps={optimalSteps}
           currentStep={currentStep}
           manifest={manifest}
+          alignedList={alignedList}
         />
       </div>
     </div>

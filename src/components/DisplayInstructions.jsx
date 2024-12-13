@@ -1,4 +1,5 @@
-const DisplayInstructions = ({ optimalSteps, currentStep, manifest }) => {
+const DisplayInstructions = ({ optimalSteps, currentStep, manifest, alignedList }) => {
+    console.log("DisplayInstructions alignedList", alignedList);
     let currentCol, currentRow, entry, name, nextCol, nextRow, nextEntry, nextName;
     if (currentStep) {
         currentCol = currentStep[1][0][1];
@@ -9,6 +10,10 @@ const DisplayInstructions = ({ optimalSteps, currentStep, manifest }) => {
         nextRow = currentStep[1][1][0];
         nextEntry = nextRow == 15 && nextCol == 39 ? 194 : (nextRow - 1) * 12 + (nextCol - 1);
         nextName = manifest[nextEntry].name;
+        if (alignedList && entry == 194 && nextName == "UNUSED") {
+            name = alignedList[currentStep[0]];
+            console.log(" DISPLAY INSTRUCTIONS CURR STEP ", name, "INDEX", currentStep[0]);
+        }
     }
 
     console.log("DisplayInstructions optimalSteps", optimalSteps);
@@ -16,7 +21,7 @@ const DisplayInstructions = ({ optimalSteps, currentStep, manifest }) => {
     const currentStepIndex = optimalSteps?.findIndex(
         (step) => JSON.stringify(step) === JSON.stringify(currentStep?.[1])
     )
-    console.log("CURRENTSTEP INDEX", currentStepIndex);
+    // console.log("CURRENTSTEP INDEX", currentStepIndex);
 
     return (
         <div>
@@ -38,9 +43,13 @@ const DisplayInstructions = ({ optimalSteps, currentStep, manifest }) => {
                             const newCol = step[1][1];
                             const newRow = step[1][0];
                             const currEntry = currRow == 15 && currCol == 39 ? 194 : (currRow - 1) * 12 + (currCol - 1);
-                            const currName = manifest[currEntry].name;
+                            let currName = manifest[currEntry].name;
                             const newEntry = newRow == 15 && newCol == 39 ? 194 : (newRow - 1) * 12 + (newCol - 1);
                             const newName = manifest[newEntry].name;
+                            if (alignedList && currEntry == 194 && newName == "UNUSED") {
+                                currName = alignedList[index + 1 + currentStepIndex];
+                                console.log(" DISPLAY INSTRUCTIONS NEXT STEP ", currName, "INDEX", index + 1 + currentStepIndex);
+                            }
                                 
                             return (
                                 <li key={index} className="text-base">
