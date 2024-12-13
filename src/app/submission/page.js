@@ -118,12 +118,14 @@ const Submission = () => {
 			<h2 className="text-xl font-semibold mb-2">Limitations</h2>
 			<ul className="list-disc list-inside mb-4 space-y-2">
 				<li>
-					The website's storage capacity is limited, and running a complex A*
-					search for a certain amount of time tends to exceed it, causing the
-					function to pause and stop running. To address this, we reduced the
-					time limit from 15 minutes to 3 minutes. While this change prevents
-					the website from pausing, it also results in a potential less optimal
-					output.
+					<li>
+						The website&#39;s storage capacity is limited, and running a complex
+						A*&#10;search for a certain amount of time tends to exceed it,
+						causing the&#10;function to pause and stop running. To address this,
+						we reduced the&#10;time limit from 15 minutes to 3 minutes. While
+						this change prevents&#10;the website from pausing, it also results
+						in a potential less optimal&#10;output.
+					</li>
 				</li>
 			</ul>
 		</div>
