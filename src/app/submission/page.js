@@ -61,8 +61,8 @@ const Submission = () => {
 					>
 						<strong>CargoFlowFall2024_Attempt1.pdf</strong>
 					</a>{" "}
-					- Our original pitch to Mr. Keogh, delivered on March 17th, 2023, at
-					10:00 AM.
+					- Our original pitch to Mr. Keogh, delivered on October 13th, 2024, at
+					9:00 AM.
 				</li>
 				<li>
 					<a
