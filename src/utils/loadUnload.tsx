@@ -1,6 +1,26 @@
 import parseManifestToGrid from "@/utils/grid_utils";
 import { ManifestEntry } from "@/utils/grid_utils";
 
+function calculateTotalCost(listOfMoves: number[][][]): number {
+  let totalCost: number = 0;
+
+  for (const move of listOfMoves) {
+    // Ship to truck move.
+    if (move[1][0] == 15 && move[1][1] == 39) {
+      totalCost += 3 + Math.abs(move[0][0] - 8) + Math.abs(move[0][1] - 1);
+    } else if (move[0][0] == 15 && move[0][1] == 39) {
+      // Truck to ship move.
+      totalCost += 3 + Math.abs(move[1][0] - 8) + Math.abs(move[1][1] - 1);
+    } else {
+      // Ship to ship move.
+      totalCost +=
+        Math.abs(move[0][0] - move[1][0]) + Math.abs(move[0][1] - move[1][1]);
+    }
+  }
+
+  return totalCost;
+}
+
 // Returns the coordinates of the lowest cost unload container.
 function findLowestCostUnload(
   grid: ManifestEntry[][],
@@ -354,57 +374,58 @@ function unload(
   return [grid, moves];
 }
 
-const loadDest = (
-  grid: ManifestEntry[][],
-  containersToUnload: string[]
-): [number, number] | null => {
-  let bestDest: { distance: number; coordinates: [number, number] | null } = {
-    distance: Infinity,
-    coordinates: null,
-  };
+// const loadDest = (
+//   grid: ManifestEntry[][],
+//   containersToUnload: string[]
+// ): [number, number] | null => {
+//   let bestDest: { distance: number; coordinates: [number, number] | null } = {
+//     distance: Infinity,
+//     coordinates: null,
+//   };
 
-  for (let col = 0; col < 12; col++) {
-    let skipColumnF = false;
-    for (let row = 0; row < 7; row++) {
-      const cellName = grid[row][col].name;
-      if (containersToUnload.includes(cellName)) {
-        skipColumnF = true;
-        break;
-      }
-    }
-    if (skipColumnF) continue;
-    for (let row = 0; row < 8; row++) {
-      const cellName = grid[row][col].name;
-      if (
-        cellName === "UNUSED" &&
-        (row == 0 || grid[row - 1][col].name !== "UNUSED")
-      ) {
-        // Check for available square in grid
-        const currDistance = Math.abs(7 - row) + Math.abs(0 - col);
-        if (currDistance < bestDest.distance) {
-          bestDest = {
-            distance: currDistance,
-            coordinates: [row + 1, col + 1],
-          };
-          break;
-        }
-      }
-    }
-  }
-  if (bestDest.coordinates === null) {
-    return null;
-  }
+//   for (let col = 0; col < 12; col++) {
+//     let skipColumnF = false;
+//     for (let row = 0; row < 7; row++) {
+//       const cellName = grid[row][col].name;
+//       if (containersToUnload.includes(cellName)) {
+//         skipColumnF = true;
+//         break;
+//       }
+//     }
+//     if (skipColumnF) continue;
+//     for (let row = 0; row < 8; row++) {
+//       const cellName = grid[row][col].name;
+//       if (
+//         cellName === "UNUSED" &&
+//         (row == 0 || grid[row - 1][col].name !== "UNUSED")
+//       ) {
+//         // Check for available square in grid
+//         const currDistance = Math.abs(7 - row) + Math.abs(0 - col);
+//         if (currDistance < bestDest.distance) {
+//           bestDest = {
+//             distance: currDistance,
+//             coordinates: [row + 1, col + 1],
+//           };
+//           break;
+//         }
+//       }
+//     }
+//   }
+//   if (bestDest.coordinates === null) {
+//     return null;
+//   }
 
-  return bestDest.coordinates;
-};
+//   return bestDest.coordinates;
+// };
 
 const loadUnload = (
   manifest,
   originalContainersToLoad: string[],
   originalContainersToUnload: string[]
-): number[][][] => {
+): [number[][][], number[], number] => {
   let grid: ManifestEntry[][] = parseManifestToGrid(manifest);
   let listOfMoves: number[][][] = [];
+  let isMoveLoad: number[] = [];
   let containersToUnload: string[] = JSON.parse(
     JSON.stringify(originalContainersToUnload)
   );
@@ -430,6 +451,7 @@ const loadUnload = (
     grid = updatedGridAfterBlockingContainers;
     for (const move of blockingContainerMoves) {
       listOfMoves.push(move);
+      isMoveLoad.push(0);
     }
 
     // Unload.
@@ -452,6 +474,7 @@ const loadUnload = (
     grid = updatedGridAfterUnload;
     for (const move of unloadMoves) {
       listOfMoves.push(move);
+      isMoveLoad.push(0);
     }
     containersToUnload.splice(lowestCostUnloadCoords.index, 1);
 
@@ -472,6 +495,7 @@ const loadUnload = (
       grid = updatedGrid;
       for (const move of loadMoves) {
         listOfMoves.push(move);
+        isMoveLoad.push(1);
       }
     }
   }
@@ -493,6 +517,7 @@ const loadUnload = (
       grid = updatedGrid;
       for (const move of loadMoves) {
         listOfMoves.push(move);
+        isMoveLoad.push(1);
       }
     }
   }
@@ -515,6 +540,7 @@ const loadUnload = (
     grid = updatedGridAfterBlockingContainers;
     for (const move of blockingContainerMoves) {
       listOfMoves.push(move);
+      isMoveLoad.push(0);
     }
 
     // Unload.
@@ -537,13 +563,12 @@ const loadUnload = (
     grid = updatedGridAfterUnload;
     for (const move of unloadMoves) {
       listOfMoves.push(move);
+      isMoveLoad.push(0);
     }
-    console.log("taco popping from unload list");
     containersToUnload.splice(lowestCostUnloadCoords.index, 1);
-    console.log(containersToUnload);
   }
 
-  return listOfMoves;
+  return [listOfMoves, isMoveLoad, calculateTotalCost(listOfMoves)];
 };
 
 export default loadUnload;
