@@ -1,6 +1,26 @@
 import parseManifestToGrid from "@/utils/grid_utils";
 import { ManifestEntry } from "@/utils/grid_utils";
 
+function calculateTotalCost(listOfMoves: number[][][]): number {
+  let totalCost: number = 0;
+
+  for (const move of listOfMoves) {
+    // Ship to truck move.
+    if (move[1][0] == 15 && move[1][1] == 39) {
+      totalCost += 3 + Math.abs(move[0][0] - 8) + Math.abs(move[0][1] - 1);
+    } else if (move[0][0] == 15 && move[0][1] == 39) {
+      // Truck to ship move.
+      totalCost += 3 + Math.abs(move[1][0] - 8) + Math.abs(move[1][1] - 1);
+    } else {
+      // Ship to ship move.
+      totalCost +=
+        Math.abs(move[0][0] - move[1][0]) + Math.abs(move[0][1] - move[1][1]);
+    }
+  }
+
+  return totalCost;
+}
+
 // Returns the coordinates of the lowest cost unload container.
 function findLowestCostUnload(
   grid: ManifestEntry[][],
@@ -29,7 +49,7 @@ function findLowestCostUnload(
     for (let r = 7; r >= 0; r--) {
       const currCell: ManifestEntry = grid[r][c];
 
-      if (currCell.name == "NAN" || currCell.name == "UNUSED") {
+      if (currCell.name == "UNUSED") {
         continue;
       }
 
@@ -57,7 +77,7 @@ function findLowestCostUnload(
         let num_blockingContainers_above: number = 0;
         while (temp_r <= 7) {
           const tempCell: ManifestEntry = grid[temp_r][c];
-          if (tempCell.name != "NAN" && tempCell.name != "UNUSED") {
+          if (tempCell.name != "UNUSED") {
             num_blockingContainers_above += 1;
           } else {
             break;
@@ -84,10 +104,6 @@ function findLowestCostUnload(
   );
 
   let index: number = containersToUnload.findIndex((s) => {
-    console.log("taco FINDING LOWEST COST UNLOAD")
-    console.log(containersToUnload)
-    console.log(costs)
-    console.log(costs[0])
     return s == costs[0].name;
   });
   return { row: costs[0].row, col: costs[0].col, index: index };
@@ -108,7 +124,6 @@ function findBestCoordsToMoveBlockingContainer(
   let l: number = col - 1;
   let r: number = col + 1;
   while (l >= 0 && r < 12) {
-    console.log(`taco find best move block curr at l r ${l} and ${r}`);
     // Check left.
     for (let i = 0; i < 8; i++) {
       const currCell: ManifestEntry = grid[i][l];
@@ -117,7 +132,7 @@ function findBestCoordsToMoveBlockingContainer(
         second_pass_best_row == -1
       ) {
         while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][l].name == "NAN" || grid[i][l].name == "UNUSED") {
+          if (grid[i][l].name == "UNUSED") {
             second_pass_best_row = i;
             second_pass_best_col = l;
           }
@@ -127,7 +142,7 @@ function findBestCoordsToMoveBlockingContainer(
         break;
       }
 
-      if (currCell.name == "NAN" || currCell.name == "UNUSED") {
+      if (currCell.name == "UNUSED") {
         return { row: i, col: l };
       }
     }
@@ -142,7 +157,7 @@ function findBestCoordsToMoveBlockingContainer(
         second_pass_best_row == -1
       ) {
         while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][r].name == "NAN" || grid[i][r].name == "UNUSED") {
+          if (grid[i][r].name == "UNUSED") {
             second_pass_best_row = i;
             second_pass_best_col = r;
           }
@@ -152,7 +167,7 @@ function findBestCoordsToMoveBlockingContainer(
         break;
       }
 
-      if (currCell.name == "NAN" || currCell.name == "UNUSED") {
+      if (currCell.name == "UNUSED") {
         return { row: i, col: r };
       }
     }
@@ -167,7 +182,7 @@ function findBestCoordsToMoveBlockingContainer(
         second_pass_best_row == -1
       ) {
         while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][l].name == "NAN" || grid[i][l].name == "UNUSED") {
+          if (grid[i][l].name == "UNUSED") {
             second_pass_best_row = i;
             second_pass_best_col = l;
           }
@@ -177,7 +192,7 @@ function findBestCoordsToMoveBlockingContainer(
         break;
       }
 
-      if (currCell.name == "NAN" || currCell.name == "UNUSED") {
+      if (currCell.name == "UNUSED") {
         return { row: i, col: l };
       }
     }
@@ -192,7 +207,7 @@ function findBestCoordsToMoveBlockingContainer(
         second_pass_best_row == -1
       ) {
         while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][r].name == "NAN" || grid[i][r].name == "UNUSED") {
+          if (grid[i][r].name == "UNUSED") {
             second_pass_best_row = i;
             second_pass_best_col = r;
           }
@@ -202,7 +217,7 @@ function findBestCoordsToMoveBlockingContainer(
         break;
       }
 
-      if (currCell.name == "NAN" || currCell.name == "UNUSED") {
+      if (currCell.name == "UNUSED") {
         return { row: i, col: r };
       }
     }
@@ -210,6 +225,58 @@ function findBestCoordsToMoveBlockingContainer(
   }
 
   return { row: second_pass_best_row, col: second_pass_best_col };
+}
+
+function findBestLoadCoords(
+  grid: ManifestEntry[][],
+  containersToUnload: string[]
+): { row: number; col: number } {
+  const containersToUnloadSet: Set<string> = new Set<string>(
+    containersToUnload
+  );
+  for (let c: number = 0; c < 12; c++) {
+    for (let r: number = 0; r < 8; r++) {
+      if (containersToUnloadSet.has(grid[r][c].name)) {
+        continue;
+      }
+
+      if (grid[r][c].name == "UNUSED") {
+        return { row: r, col: c };
+      }
+    }
+  }
+
+  return { row: -1, col: -1 };
+}
+
+// Return the updated grid and set of moves after loading a container onto the ship grid.
+function load(
+  row: number,
+  col: number,
+  name: string,
+  originalGrid: ManifestEntry[][],
+  listOfMoves: number[][][]
+): [ManifestEntry[][], number[][][]] {
+  let updatedGrid: ManifestEntry[][] = JSON.parse(JSON.stringify(originalGrid));
+  let moves: number[][][] = [];
+
+  // Check if most recent to move is not already at truck cell, then move to truck cell first.
+  if (listOfMoves.length > 0) {
+    let prevToCoord: number[] = listOfMoves[listOfMoves.length - 1][1];
+    if (!(prevToCoord[0] == 15 && prevToCoord[1] == 39)) {
+      moves.push([prevToCoord, [15, 39]]);
+    }
+  }
+
+  // Move from truck cell (15, 39) to target cell.
+  moves.push([
+    [15, 39],
+    [row + 1, col + 1],
+  ]);
+
+  updatedGrid[row][col].name = name;
+
+  return [updatedGrid, moves];
 }
 
 // Given the coordinates of a container to unload, moves all blocking containers above to another available column with no unload containers. In the case that all columns have unload containers, move blocking containers to nearest available column. Returns the updated grid after moving the blockinb containers and the formatted set of moves..
@@ -222,19 +289,12 @@ function moveBlockingContainers(
   let grid: ManifestEntry[][] = JSON.parse(JSON.stringify(originalGrid));
   let listOfMoves: number[][][] = [];
   // Check if there are any blocking containers above target container.
-  if (
-    row + 1 < 8 &&
-    (grid[row + 1][col].name == "NAN" || grid[row + 1][col].name == "UNUSED")
-  ) {
+  if (row + 1 < 8 && grid[row + 1][col].name == "UNUSED") {
     return [grid, listOfMoves];
   } else {
     let blockingContainers: { row: number; col: number }[] = [];
     let i: number = row + 1;
-    while (
-      i < 8 &&
-      grid[i][col].name != "NAN" &&
-      grid[i][col].name != "UNUSED"
-    ) {
+    while (i < 8 && grid[i][col].name != "UNUSED") {
       blockingContainers.push({ row: i, col: col });
       i += 1;
     }
@@ -314,57 +374,64 @@ function unload(
   return [grid, moves];
 }
 
-const loadDest = (
-  grid: ManifestEntry[][],
-  containersToUnload: string[]
-): [number, number] | null => {
-  let bestDest: { distance: number; coordinates: [number, number] | null } = {
-    distance: Infinity,
-    coordinates: null,
-  };
+// const loadDest = (
+//   grid: ManifestEntry[][],
+//   containersToUnload: string[]
+// ): [number, number] | null => {
+//   let bestDest: { distance: number; coordinates: [number, number] | null } = {
+//     distance: Infinity,
+//     coordinates: null,
+//   };
 
-  for (let col = 0; col < 12; col++) {
-    let skipColumnF = false;
-    for (let row = 0; row < 7; row++) {
-      const cellName = grid[row][col].name;
-      if (containersToUnload.includes(cellName)) {
-        skipColumnF = true;
-        break;
-      }
-    }
-    if (skipColumnF) continue;
-    for (let row = 0; row < 8; row++) {
-      const cellName = grid[row][col].name;
-      if (
-        cellName === "UNUSED" &&
-        (row == 0 || grid[row - 1][col].name !== "UNUSED")
-      ) {
-        // Check for available square in grid
-        const currDistance = Math.abs(7 - row) + Math.abs(0 - col);
-        if (currDistance < bestDest.distance) {
-          bestDest = {
-            distance: currDistance,
-            coordinates: [row + 1, col + 1],
-          };
-          break;
-        }
-      }
-    }
-  }
-  if (bestDest.coordinates === null) {
-    return null;
-  }
+//   for (let col = 0; col < 12; col++) {
+//     let skipColumnF = false;
+//     for (let row = 0; row < 7; row++) {
+//       const cellName = grid[row][col].name;
+//       if (containersToUnload.includes(cellName)) {
+//         skipColumnF = true;
+//         break;
+//       }
+//     }
+//     if (skipColumnF) continue;
+//     for (let row = 0; row < 8; row++) {
+//       const cellName = grid[row][col].name;
+//       if (
+//         cellName === "UNUSED" &&
+//         (row == 0 || grid[row - 1][col].name !== "UNUSED")
+//       ) {
+//         // Check for available square in grid
+//         const currDistance = Math.abs(7 - row) + Math.abs(0 - col);
+//         if (currDistance < bestDest.distance) {
+//           bestDest = {
+//             distance: currDistance,
+//             coordinates: [row + 1, col + 1],
+//           };
+//           break;
+//         }
+//       }
+//     }
+//   }
+//   if (bestDest.coordinates === null) {
+//     return null;
+//   }
 
-  return bestDest.coordinates;
-};
+//   return bestDest.coordinates;
+// };
 
 const loadUnload = (
   manifest,
-  containersToLoad: string[],
-  containersToUnload: string[]
-): number[][][] => {
+  originalContainersToLoad: string[],
+  originalContainersToUnload: string[]
+): [number[][][], number[], number] => {
   let grid: ManifestEntry[][] = parseManifestToGrid(manifest);
   let listOfMoves: number[][][] = [];
+  let isMoveLoad: number[] = [];
+  let containersToUnload: string[] = JSON.parse(
+    JSON.stringify(originalContainersToUnload)
+  );
+  let containersToLoad: string[] = JSON.parse(
+    JSON.stringify(originalContainersToLoad)
+  );
 
   while (containersToUnload.length > 0 && containersToLoad.length > 0) {
     // Find lowest cost unload.
@@ -384,6 +451,7 @@ const loadUnload = (
     grid = updatedGridAfterBlockingContainers;
     for (const move of blockingContainerMoves) {
       listOfMoves.push(move);
+      isMoveLoad.push(0);
     }
 
     // Unload.
@@ -406,18 +474,55 @@ const loadUnload = (
     grid = updatedGridAfterUnload;
     for (const move of unloadMoves) {
       listOfMoves.push(move);
+      isMoveLoad.push(0);
     }
     containersToUnload.splice(lowestCostUnloadCoords.index, 1);
 
     // Attempt load.
+    const bestLoadCoords: { row: number; col: number } = findBestLoadCoords(
+      grid,
+      containersToUnload
+    );
+    if (!(bestLoadCoords.row == -1 && bestLoadCoords.col == -1)) {
+      const [updatedGrid, loadMoves]: [ManifestEntry[][], number[][][]] = load(
+        bestLoadCoords.row,
+        bestLoadCoords.col,
+        containersToLoad[0],
+        grid,
+        listOfMoves
+      );
+      containersToLoad.splice(0, 1);
+      grid = updatedGrid;
+      for (const move of loadMoves) {
+        listOfMoves.push(move);
+        isMoveLoad.push(1);
+      }
+    }
   }
 
-  while (containersToLoad.length > 0) {}
+  while (containersToLoad.length > 0) {
+    const bestLoadCoords: { row: number; col: number } = findBestLoadCoords(
+      grid,
+      containersToUnload
+    );
+    if (!(bestLoadCoords.row == -1 && bestLoadCoords.col == -1)) {
+      const [updatedGrid, loadMoves]: [ManifestEntry[][], number[][][]] = load(
+        bestLoadCoords.row,
+        bestLoadCoords.col,
+        containersToLoad[0],
+        grid,
+        listOfMoves
+      );
+      containersToLoad.splice(0, 1);
+      grid = updatedGrid;
+      for (const move of loadMoves) {
+        listOfMoves.push(move);
+        isMoveLoad.push(1);
+      }
+    }
+  }
 
   while (containersToUnload.length > 0) {
-    console.log("taco unload while loop")
-    console.log(containersToUnload)
-    console.log(grid)
     // Find lowest cost unload.
     let lowestCostUnloadCoords: { row: number; col: number; index: number } =
       findLowestCostUnload(grid, containersToUnload);
@@ -435,6 +540,7 @@ const loadUnload = (
     grid = updatedGridAfterBlockingContainers;
     for (const move of blockingContainerMoves) {
       listOfMoves.push(move);
+      isMoveLoad.push(0);
     }
 
     // Unload.
@@ -457,13 +563,12 @@ const loadUnload = (
     grid = updatedGridAfterUnload;
     for (const move of unloadMoves) {
       listOfMoves.push(move);
+      isMoveLoad.push(0);
     }
-    console.log("taco popping from unload list")
     containersToUnload.splice(lowestCostUnloadCoords.index, 1);
-    console.log(containersToUnload);
   }
 
-  return listOfMoves;
+  return [listOfMoves, isMoveLoad, calculateTotalCost(listOfMoves)];
 };
 
 export default loadUnload;
