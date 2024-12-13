@@ -8,7 +8,6 @@ const DisplayInstructions = ({ optimalSteps, currentStep, manifest }) => {
         nextCol = currentStep[1][1][1];
         nextRow = currentStep[1][1][0];
         nextEntry = nextRow == 15 && nextCol == 39 ? 194 : (nextRow - 1) * 12 + (nextCol - 1);
-        console.log("Next Entry", nextEntry);
         nextName = manifest[nextEntry].name;
     }
 
