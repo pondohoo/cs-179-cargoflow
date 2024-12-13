@@ -4,6 +4,7 @@ import DisplayInstructions from "./DisplayInstructions";
 
 import loadUnload from "@/utils/loadUnload";
 import rebalance from "@/utils/rebalance";
+import addLogEntry from "@/utils/addLogEntry";
 
 const StepHandler = ({
   manifest,
@@ -86,6 +87,11 @@ const StepHandler = ({
     console.log("nextCol", nextCol, "nextRow", nextRow);
     const newManifest = [...manifest];
     console.log("newManifest", newManifest);
+
+	if (manifest[nextEntry].name == "UNUSED")
+		{ 
+			addLogEntry("\"" + currentName + "\"" + " moved from position [" + currentRow + "," + currentCol + "] to position [" + nextRow + "," + nextCol + "]");
+		}
 
     if (!(
       manifest[nextEntry] &&
