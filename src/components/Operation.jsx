@@ -12,10 +12,10 @@ const Operation = ({ operation }) => {
 	const [done, setDone] = useState(false);
 	const [readyToExport, setReadyToExport] = useState(false);
 	const [manifest, setManifest] = useState(() => {
-    const savedManifest = localStorage.getItem("manifest");
-    return savedManifest ? JSON.parse(savedManifest) : null
-  });
-  const [optimalSteps, setOptimalSteps] = useState(() => {
+    	const savedManifest = localStorage.getItem("manifest");
+    	return savedManifest ? JSON.parse(savedManifest) : null
+  	});
+  	const [optimalSteps, setOptimalSteps] = useState(() => {
 		const savedOptimalSteps = localStorage.getItem("optimalSteps");
 		return savedOptimalSteps ? JSON.parse(savedOptimalSteps) : null;
 	});
@@ -25,7 +25,9 @@ const Operation = ({ operation }) => {
 		return savedCurrentStep ? JSON.parse(savedCurrentStep) : null;
 	});
 
-	const [shipName, setShipName] = useState("");
+	const [shipName, setShipName] = useState(() => {
+		return localStorage.getItem("shipName") || "";
+	});
 
 	useEffect(() => {
 		if (manifest) {
@@ -37,14 +39,18 @@ const Operation = ({ operation }) => {
 		if (currentStep) {
 			localStorage.setItem("currentStep", JSON.stringify(currentStep));
 		}
-	}, [manifest, optimalSteps, currentStep]);
+		if (shipName) {
+			localStorage.setItem("shipName", shipName);
+		}
+	}, [manifest, optimalSteps, currentStep, shipName]);
 
 	const handleFinish = () => {
 		setReadyToExport(true);
 	}
 	return (
 		<div className="flex flex-col">
-			{shipName && <div>Ship: {shipName.slice(0, -4)}</div>}
+			{shipName && <div className="text-black items-center justify-center border-2 border-black bg-white px-2 py-1 m-0 w-fit">
+				Ship: {shipName.slice(0, -4)}</div>}
 			{!readyToExport ? (
 				!manifest ? (
 					<UploadManifest setShipName={setShipName} setManifest={setManifest} />
