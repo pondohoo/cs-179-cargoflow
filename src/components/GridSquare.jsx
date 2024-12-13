@@ -51,8 +51,23 @@ const GridSquare = ({ entry, currentStep }) => {
 			onMouseLeave={handleMouseLeave}
 		>
 			{showPopup && (
-				<div className="absolute z-10 bg-white text-black border border-black p-1 text-xs">
-					{`Name: ${entry.name}, Coordinates: (${entry.row}, ${entry.col})`}
+				<div
+					className="absolute z-10 bg-white text-black border border-gray-300 rounded-lg shadow-md p-3 text-sm"
+					style={{
+						transform: 'translateY(-120%)',
+						whiteSpace: 'nowrap',
+					}}
+				>
+					<div className="font-semibold text-ibm-gray mb-1">Container Details</div>
+					<p>
+						<span className="font-semibold text-ibm-blue">Name:</span> {entry.name}
+					</p>
+					<p>
+						<span className="font-semibold text-ibm-pink">Weight:</span> {entry.weight}
+					</p>
+					<p>
+						<span className="font-semibold text-ibm-yellow">Coordinates:</span> ({entry.row}, {entry.col})
+					</p>
 				</div>
 			)}
 		</div>
