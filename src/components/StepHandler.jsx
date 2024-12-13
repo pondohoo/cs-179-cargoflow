@@ -31,6 +31,7 @@ const StepHandler = ({
   const [pendingEntry, setPendingEntry] = useState(null);
   const [loadUnloadOperationList, setLoadUnloadOperationList] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
 	if (currentTime) {
@@ -40,34 +41,38 @@ const StepHandler = ({
 		localStorage.setItem("generatedCost", JSON.stringify(generatedCost));
 	}},[currentTime,generatedCost])
 
-  const getMoves = () => {
+  const getMoves = async () => {
     if (manifest === null) {
       throw new Error("No manifest found");
     }
-    const startTime = performance.now();
-	  let generatedOptimalSteps;
-	  let cost;
-    if (operation === "rebalance") {
-	  const generatedOptimalStepsAndCost = rebalance(manifest);
-	  generatedOptimalSteps = generatedOptimalStepsAndCost[0];
-	  cost = generatedOptimalStepsAndCost[1];
-	  console.log("generatedOptimalSteps is", generatedOptimalSteps);
-      console.log("generatedCost is", cost);
-      setGeneratedCost(cost);
-    } else {
-      const generatedOptimalStepsAndCost = loadUnload(
-        manifest,
-        containersToLoad,
-        containersToUnload
-      );
-      generatedOptimalSteps = generatedOptimalStepsAndCost[0];
-      cost = generatedOptimalStepsAndCost[2];
-      setGeneratedCost(cost);
-      setLoadUnloadOperationList(generatedOptimalStepsAndCost[1]);
-    }
-    setCurrentTime(Date.now());
-    setOptimalSteps(generatedOptimalSteps);
-    setCurrentStep([0, generatedOptimalSteps[0]]);
+    let generatedOptimalSteps;
+    let cost;
+    
+    setIsLoading(true);
+    setTimeout(() => {
+      if (operation === "rebalance") {
+        const generatedOptimalStepsAndCost = rebalance(manifest);
+        generatedOptimalSteps = generatedOptimalStepsAndCost[0];
+        cost = generatedOptimalStepsAndCost[1];
+        console.log("generatedOptimalSteps is", generatedOptimalSteps);
+        console.log("generatedCost is", cost);
+        setGeneratedCost(cost);
+      } else {
+        const generatedOptimalStepsAndCost = loadUnload(
+          manifest,
+          containersToLoad,
+          containersToUnload
+        );
+        generatedOptimalSteps = generatedOptimalStepsAndCost[0];
+        cost = generatedOptimalStepsAndCost[2];
+        setGeneratedCost(cost);
+        setLoadUnloadOperationList(generatedOptimalStepsAndCost[1]);
+      }
+      setCurrentTime(Date.now());
+      setOptimalSteps(generatedOptimalSteps);
+      setCurrentStep([0, generatedOptimalSteps[0]]);
+      setIsLoading(false);
+    }, 0);
   };
 
   let loadPointer = 0;
@@ -101,7 +106,6 @@ const StepHandler = ({
     const nextEntry = (nextRow - 1) * 12 + (nextCol - 1);
     console.log("nextCol", nextCol, "nextRow", nextRow);
     const newManifest = [...manifest];
-    // const newManifest = JSON.parse(JSON.stringify(manifest));
     console.log("newManifest", newManifest);
 
 
@@ -203,6 +207,13 @@ const StepHandler = ({
 
   return (
     <div>
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <p className="text-xl text-ibm-gray font-bold">Loading...</p>
+          </div>
+        </div>
+      )}
       {showWeightPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
