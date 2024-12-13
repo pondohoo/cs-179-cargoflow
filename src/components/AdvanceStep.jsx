@@ -12,13 +12,14 @@ const AdvanceStep = ({ start, currentStep, progress }) => {
     setInProgress(true);
     start();
   }
+  const done = localStorage.getItem("done");
 	
 	return (
 		<>
-			{!inProgress ? (
+			{!inProgress ? ( !done && (
 				<button onClick={handleStart} className="px-4 py-2 bg-ibm-yellow text-black font-medium rounded shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300">
 					Start
-				</button>
+				</button>)
 			) : ( currentStep ? (
 				<button onClick={progress} className="px-4 py-2 bg-ibm-yellow text-black font-medium rounded shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300">
 					Progress
