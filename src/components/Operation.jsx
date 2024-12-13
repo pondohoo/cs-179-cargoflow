@@ -9,7 +9,10 @@ import ExportManifest from "./ExportManifest";
 
 const Operation = ({ operation }) => {
 	console.log("operation", operation);
-	const [done, setDone] = useState(false);
+	const [done, setDone] = useState(() => {
+		const savedDone = localStorage.getItem("done");
+		return savedDone ? JSON.parse(savedDone) : false;
+	});
 	const [readyToExport, setReadyToExport] = useState(false);
 	const [manifest, setManifest] = useState(() => {
     const savedManifest = localStorage.getItem("manifest");
@@ -31,13 +34,17 @@ const Operation = ({ operation }) => {
 		if (manifest) {
 			localStorage.setItem("manifest", JSON.stringify(manifest));
 		}
+		if (done) {
+			localStorage.removeItem("currentStep");
+			localStorage.setItem("done", JSON.stringify(done));
+		}
     	if (optimalSteps) {
 			localStorage.setItem("optimalSteps", JSON.stringify(optimalSteps));
 		}
 		if (currentStep) {
 			localStorage.setItem("currentStep", JSON.stringify(currentStep));
 		}
-	}, [manifest, optimalSteps, currentStep]);
+	}, [manifest, optimalSteps, currentStep, done]);
 
 	const handleFinish = () => {
 		setReadyToExport(true);
