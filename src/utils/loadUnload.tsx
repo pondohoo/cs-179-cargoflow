@@ -108,7 +108,6 @@ function findBestCoordsToMoveBlockingContainer(
   let l: number = col - 1;
   let r: number = col + 1;
   while (l >= 0 && r < 12) {
-    console.log(`taco find best move block curr at l r ${l} and ${r}`);
     // Check left.
     for (let i = 0; i < 8; i++) {
       const currCell: ManifestEntry = grid[i][l];
