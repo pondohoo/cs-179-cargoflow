@@ -3,7 +3,7 @@ export default function downloadLogs() {
   // Parse through IndexedDB stringlist with all log entries and create downloadable txt.
 
   const currYear = new Date().getFullYear();
-  const databaseName: string = "cargoflowDatabase" + currYear;
+  const databaseName: string = "KeoghsPort" + currYear;
   const storeName: string = "cargoflowLogs" + currYear;
   const allText: string = "";
 

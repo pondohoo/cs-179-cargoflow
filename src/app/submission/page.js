@@ -54,7 +54,7 @@ const Submission = () => {
 					- Evidence of our efforts to plan our elicitation of requirements from
 					Mr. Keogh, and any notes taken during the elicitation.
 				</li>
-				<li className="text-red-500">
+				<li className="">
 					<a
 						href="https://drive.google.com/file/d/1FOM86qgRk5hVelKeKrLsziqeBVaV9P2Y/view?usp=sharing"
 						className="text-blue-600 underline"
@@ -66,7 +66,7 @@ const Submission = () => {
 				</li>
 				<li>
 					<a
-						href="https://drive.google.com/file/d/1SPw5EXKlnAvd49c6xUQBVhDrRMIbLWqr/view?usp=sharing"
+						href="https://drive.google.com/file/d/1iKqO5GUQ__ExUX9pW2Knd4O1utOK-q6q/view?usp=sharing"
 						className="text-blue-600 underline"
 					>
 						<strong>CargoFlowFall2024_Attempt1_Revised.pdf</strong>
@@ -85,7 +85,7 @@ const Submission = () => {
 				</li>
 				<li>
 					<a
-						href="https://drive.google.com/file/d/14U0_TQGhIc7SjbvGvmhC7iMYPIp1VlZo/view?usp=sharing"
+						href="https://drive.google.com/file/d/1Vs6hPF17p9imkeJorl4mx86eeUq6qeP2/view?usp=sharing"
 						className="text-blue-600 underline"
 					>
 						<strong>CargoFlowTesting.pdf</strong>
@@ -102,32 +102,58 @@ const Submission = () => {
 					</a>{" "}
 					- Points to a GitHub repository of our code.
 				</li>
-				<li className="text-red-500">
+				<li className="">
 					This{" "}
-					<a href="#" className="text-blue-600 underline">
+					<a href="https://youtu.be/X93dlakq2KQ" className="text-blue-600 underline">
 						YouTube video
 					</a>{" "}
 					- Shows our software solving one balance and one transfer test case.
 				</li>
-				<li className="text-red-500">
-					<strong>KeoghsPort2024.txt</strong> - Log created by our software
+				<li className="">
+					<a href="https://drive.google.com/file/d/1iV4nN704zw3996auj11TexRCorT5U8I8/view?usp=sharing" className="text-blue-600 underline">
+						<strong>KeoghsPort2024.txt</strong>
+					</a>
+					 - Log created by our software
 					during the making of the YouTube video.
 				</li>
-			</ol>
-
-			<h2 className="text-xl font-semibold mb-2">Limitations</h2>
-			<ul className="list-disc list-inside mb-4 space-y-2">
-				<li>
-					<li>
-						The website&#39;s storage capacity is limited, and running a complex
-						A*&#10;search for a certain amount of time tends to exceed it,
-						causing the&#10;function to pause and stop running. To address this,
-						we reduced the&#10;time limit from 15 minutes to 5 minutes. While
-						this change prevents&#10;the website from pausing, it also results
-						in a potential less optimal&#10;output.
-					</li>
+				<li className="">
+					We would like to point out the following limitations:
+					<ul className="list-disc list-inside">
+						<li className="">
+							The website&#39;s storage capacity is limited, and running a complex
+							A*&#10;search for a certain amount of time tends to exceed it,
+							causing the&#10;function to pause and stop running. To address this,
+							we reduced the&#10;time limit from 15 minutes to 13 minutes. While
+							this change prevents&#10;the website from pausing, it also results
+							in a potential less optimal&#10;solution. This limitation also stops
+							the use of the buffer in the case of time limit exceeded because A*
+							is in charge of using the buffer to find the optimal steps.
+						</li>
+						<li>
+							For load/unloading buffer use has not been implemented.
+						</li>
+					</ul>
 				</li>
-			</ul>
+				<li className="">
+					(EK says, this is optional) Here is some additional items you may find useful in grading the project.
+					<ul className="list-disc list-inside">
+						<li className="">
+							Upon reviewing the submission video, we realized that the log file
+							name was incorrect. This was corrected, but not reflected in the video.
+						</li>
+					</ul>
+				</li>
+				<li className="">
+					(EK says, this is optional) We would like to acknowledge the following ...
+					<ul className="list-disc list-inside">
+						<li className="">
+							As not all members were experts on Javascript and Next.js, we had to research and learn the language and framework.
+							The sources we consulted were: the Next.js documentation, the JavaScript documentation, the React documentation,
+							Google, Stack Overflow, and GeeksforGeeks.
+						</li>
+					</ul>
+				</li>
+			</ol>
 		</div>
 	);
 };

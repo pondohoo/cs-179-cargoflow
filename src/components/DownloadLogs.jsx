@@ -11,7 +11,7 @@ const DownloadLogs = () => {
     event.preventDefault();
 
     const currYear = new Date().getFullYear();
-    const databaseName = "cargoflowDatabase" + currYear;
+    const databaseName = "KeoghsPort" + currYear;
     const storeName = "cargoflowLogs" + currYear;
     const dbRequest = indexedDB.open(databaseName, 1);
 

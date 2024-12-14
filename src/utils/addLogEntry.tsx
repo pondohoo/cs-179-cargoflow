@@ -1,7 +1,7 @@
 // Adds a log entry. Each log entry is a string and the log entires are stored in a single stringlist in a single record in an IndexedDB database.
 export default function addLogEntry(inputStr: string) {
   const currYear = new Date().getFullYear();
-  const databaseName = "cargoflowDatabase" + currYear;
+  const databaseName = "KeoghsPort" + currYear;
   const storeName: string = "cargoflowLogs" + currYear;
 
   const dbRequest: IDBOpenDBRequest = indexedDB.open(databaseName, 1);
