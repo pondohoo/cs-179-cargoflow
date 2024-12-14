@@ -326,7 +326,7 @@ const bufempty = (manifest) => {
 
 const greedy = (manifest) => {
 	const start = performance.now();
-	const totalTimeLimit = 7 * 60 * 1000; // 5 minutes
+	const totalTimeLimit = 13 * 60 * 1000; // 13 minutes
 
 	let listOfMoves = [];
 
