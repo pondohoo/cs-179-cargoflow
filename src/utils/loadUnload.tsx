@@ -18,8 +18,14 @@ function calculateTotalCost(listOfMoves: number[][][]): number {
     }
   }
 
-  console.log("TACO TOTAL COST", totalCost + (listOfMoves[0][0][0] == 15 && listOfMoves[0][0][1] == 39 ? 2 : (Math.abs(listOfMoves[0][0][0] - 8) + Math.abs(listOfMoves[0][0][1] - 1) + 1)));
-  return totalCost + (listOfMoves[0][0][0] == 15 && listOfMoves[0][0][1] == 39 ? 2 : (Math.abs(listOfMoves[0][0][0] - 8) + Math.abs(listOfMoves[0][0][1] - 1) + 1));
+  return (
+    totalCost +
+    (listOfMoves[0][0][0] == 15 && listOfMoves[0][0][1] == 39
+      ? 2
+      : Math.abs(listOfMoves[0][0][0] - 8) +
+        Math.abs(listOfMoves[0][0][1] - 1) +
+        1)
+  );
 }
 
 // Returns the coordinates of the lowest cost unload container.
@@ -111,6 +117,7 @@ function findLowestCostUnload(
 }
 
 function findBestCoordsToMoveBlockingContainer(
+  row: number,
   col: number,
   grid: ManifestEntry[][],
   containersToUnload: string[]
@@ -124,6 +131,10 @@ function findBestCoordsToMoveBlockingContainer(
   let second_pass_best_col: number = Infinity;
   let l: number = col - 1;
   let r: number = col + 1;
+  let first_pass_best_row: number = -1;
+  let first_pass_best_col: number = -1;
+  let minCost: number = Infinity;
+
   while (l >= 0 && r < 12) {
     // Check left.
     for (let i = 0; i < 8; i++) {
@@ -144,7 +155,14 @@ function findBestCoordsToMoveBlockingContainer(
       }
 
       if (currCell.name == "UNUSED") {
-        return { row: i, col: l };
+        const currCost: number =
+          Math.abs(row - i) + Math.abs(col - l);
+        if (currCost < minCost) {
+          first_pass_best_row = i;
+          first_pass_best_col = l;
+          minCost = currCost;
+          break;
+        }
       }
     }
 
@@ -169,7 +187,14 @@ function findBestCoordsToMoveBlockingContainer(
       }
 
       if (currCell.name == "UNUSED") {
-        return { row: i, col: r };
+        const currCost: number =
+          Math.abs(row - i) + Math.abs(col - r);
+        if (currCost < minCost) {
+          first_pass_best_row = i;
+          first_pass_best_col = r;
+          minCost = currCost;
+          break;
+        }
       }
     }
     r += 1;
@@ -194,7 +219,14 @@ function findBestCoordsToMoveBlockingContainer(
       }
 
       if (currCell.name == "UNUSED") {
-        return { row: i, col: l };
+        const currCost: number =
+          Math.abs(row - i) + Math.abs(col - l);
+        if (currCost < minCost) {
+          first_pass_best_row = i;
+          first_pass_best_col = l;
+          minCost = currCost;
+          break;
+        }
       }
     }
     l -= 1;
@@ -219,13 +251,24 @@ function findBestCoordsToMoveBlockingContainer(
       }
 
       if (currCell.name == "UNUSED") {
-        return { row: i, col: r };
+        const currCost: number =
+          Math.abs(row - i) + Math.abs(col - r);
+        if (currCost < minCost) {
+          first_pass_best_row = i;
+          first_pass_best_col = r;
+          minCost = currCost;
+          break;
+        }
       }
     }
     r += 1;
   }
 
-  return { row: second_pass_best_row, col: second_pass_best_col };
+  if (first_pass_best_row != -1 && first_pass_best_col != -1) {
+    return { row: first_pass_best_row, col: first_pass_best_col };
+  } else {
+    return { row: second_pass_best_row, col: second_pass_best_col };
+  }
 }
 
 function findBestLoadCoords(
@@ -235,7 +278,6 @@ function findBestLoadCoords(
   const containersToUnloadSet: Set<string> = new Set<string>(
     containersToUnload
   );
-  console.log("TACO GRID", grid);
   for (let c: number = 0; c < 12; c++) {
     for (let r: number = 0; r < 8; r++) {
       if (containersToUnloadSet.has(grid[r][c].name)) {
@@ -290,7 +332,7 @@ function moveBlockingContainers(
   col: number,
   originalGrid: ManifestEntry[][],
   containersToUnload: string[],
-  originalListOfMoves: number[][][],
+  originalListOfMoves: number[][][]
 ): [ManifestEntry[][], number[][][], number[]] {
   let grid: ManifestEntry[][] = JSON.parse(JSON.stringify(originalGrid));
   let listOfMoves: number[][][] = [];
@@ -305,19 +347,23 @@ function moveBlockingContainers(
       blockingContainers.push({ row: i, col: col });
       i += 1;
     }
-    console.log("taco found blocking container");
-    console.log(blockingContainers);
 
     let armRow: number = blockingContainers[blockingContainers.length - 1].row;
     let armCol: number = blockingContainers[blockingContainers.length - 1].col;
 
     // Move arm to blocking container if it is not already there.
-    console.log("originalListOfMoves last element", originalListOfMoves[originalListOfMoves.length - 1][1]);
-    console.log("armRow, armCol", armRow, " ", armCol);
-    if (originalListOfMoves[originalListOfMoves.length - 1][1][0] != armRow || originalListOfMoves[originalListOfMoves.length - 1][1][1] != armCol) {
-      listOfMoves.push([[originalListOfMoves[originalListOfMoves.length - 1][1][0], originalListOfMoves[originalListOfMoves.length - 1][1][1]], [armRow + 1, armCol + 1]])
+    if (
+      originalListOfMoves[originalListOfMoves.length - 1][1][0] != armRow ||
+      originalListOfMoves[originalListOfMoves.length - 1][1][1] != armCol
+    ) {
+      listOfMoves.push([
+        [
+          originalListOfMoves[originalListOfMoves.length - 1][1][0],
+          originalListOfMoves[originalListOfMoves.length - 1][1][1],
+        ],
+        [armRow + 1, armCol + 1],
+      ]);
       operationList.push(-1);
-      console.log("taco taco taco");
     }
 
     while (blockingContainers.length > 0) {
@@ -326,6 +372,7 @@ function moveBlockingContainers(
 
       const bestToCoords: { row: number; col: number } =
         findBestCoordsToMoveBlockingContainer(
+          currBlockingContainer.row,
           currBlockingContainer.col,
           grid,
           containersToUnload
@@ -346,7 +393,6 @@ function moveBlockingContainers(
           [currBlockingContainer.row + 1, currBlockingContainer.col + 1],
         ]);
         operationList.push(-1); // crane
-        console.log("taco arm move LOL");
       }
       listOfMoves.push([
         [currBlockingContainer.row + 1, currBlockingContainer.col + 1],
@@ -370,7 +416,7 @@ function unload(
   col: number,
   armRow: number,
   armCol: number,
-  originalGrid: ManifestEntry[][],
+  originalGrid: ManifestEntry[][]
 ): [ManifestEntry[][], number[][][], number[]] {
   let moves: number[][][] = [];
   let grid: ManifestEntry[][] = JSON.parse(JSON.stringify(originalGrid));
@@ -398,50 +444,6 @@ function unload(
   return [grid, moves, operationList];
 }
 
-// const loadDest = (
-//   grid: ManifestEntry[][],
-//   containersToUnload: string[]
-// ): [number, number] | null => {
-//   let bestDest: { distance: number; coordinates: [number, number] | null } = {
-//     distance: Infinity,
-//     coordinates: null,
-//   };
-
-//   for (let col = 0; col < 12; col++) {
-//     let skipColumnF = false;
-//     for (let row = 0; row < 7; row++) {
-//       const cellName = grid[row][col].name;
-//       if (containersToUnload.includes(cellName)) {
-//         skipColumnF = true;
-//         break;
-//       }
-//     }
-//     if (skipColumnF) continue;
-//     for (let row = 0; row < 8; row++) {
-//       const cellName = grid[row][col].name;
-//       if (
-//         cellName === "UNUSED" &&
-//         (row == 0 || grid[row - 1][col].name !== "UNUSED")
-//       ) {
-//         // Check for available square in grid
-//         const currDistance = Math.abs(7 - row) + Math.abs(0 - col);
-//         if (currDistance < bestDest.distance) {
-//           bestDest = {
-//             distance: currDistance,
-//             coordinates: [row + 1, col + 1],
-//           };
-//           break;
-//         }
-//       }
-//     }
-//   }
-//   if (bestDest.coordinates === null) {
-//     return null;
-//   }
-
-//   return bestDest.coordinates;
-// };
-
 const loadUnload = (
   manifest,
   originalContainersToLoad: string[],
@@ -463,11 +465,11 @@ const loadUnload = (
       findLowestCostUnload(grid, containersToUnload);
 
     // Move blocking boxes above target unload box if they exist.
-    let [updatedGridAfterBlockingContainers, blockingContainerMoves, blockingOperationList]: [
-      ManifestEntry[][],
-      number[][][],
-      number[]
-    ] = moveBlockingContainers(
+    let [
+      updatedGridAfterBlockingContainers,
+      blockingContainerMoves,
+      blockingOperationList,
+    ]: [ManifestEntry[][], number[][][], number[]] = moveBlockingContainers(
       lowestCostUnloadCoords.row,
       lowestCostUnloadCoords.col,
       grid,
@@ -499,7 +501,7 @@ const loadUnload = (
       lowestCostUnloadCoords.col,
       armRow,
       armCol,
-      grid,
+      grid
     );
     grid = updatedGridAfterUnload;
     for (const move of unloadMoves) {
@@ -516,7 +518,11 @@ const loadUnload = (
       containersToUnload
     );
     if (!(bestLoadCoords.row == -1 && bestLoadCoords.col == -1)) {
-      const [updatedGrid, loadMoves, operationList]: [ManifestEntry[][], number[][][], number[]] = load(
+      const [updatedGrid, loadMoves, operationList]: [
+        ManifestEntry[][],
+        number[][][],
+        number[]
+      ] = load(
         bestLoadCoords.row,
         bestLoadCoords.col,
         containersToLoad[0],
@@ -540,7 +546,11 @@ const loadUnload = (
       containersToUnload
     );
     if (!(bestLoadCoords.row == -1 && bestLoadCoords.col == -1)) {
-      const [updatedGrid, loadMoves, operationList]: [ManifestEntry[][], number[][][], number[]] = load(
+      const [updatedGrid, loadMoves, operationList]: [
+        ManifestEntry[][],
+        number[][][],
+        number[]
+      ] = load(
         bestLoadCoords.row,
         bestLoadCoords.col,
         containersToLoad[0],
@@ -564,11 +574,11 @@ const loadUnload = (
       findLowestCostUnload(grid, containersToUnload);
 
     // Move blocking boxes above target unload box if they exist.
-    let [updatedGridAfterBlockingContainers, blockingContainerMoves, blockingOperationList]: [
-      ManifestEntry[][],
-      number[][][],
-      number[]
-    ] = moveBlockingContainers(
+    let [
+      updatedGridAfterBlockingContainers,
+      blockingContainerMoves,
+      blockingOperationList,
+    ]: [ManifestEntry[][], number[][][], number[]] = moveBlockingContainers(
       lowestCostUnloadCoords.row,
       lowestCostUnloadCoords.col,
       grid,
