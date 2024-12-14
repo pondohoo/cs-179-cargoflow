@@ -30,8 +30,8 @@ const DisplayInstructions = ({ optimalSteps, currentStep, manifest, alignedList 
                     <h3 className="font-bold text-ibm-green text-lg">Current Instruction:</h3>
                     <p className="ml-4 text-base">
                         Move <span className="font-semibold text-ibm-blue">{nextName !== "UNUSED" ? "Crane" : name}</span> {" "}
-                        from position <span className="font-semibold text-ibm-yellow">{entry == 194 ? "Crane" : `[ ${currentRow} , ${currentCol} ]`}</span>{" "}
-                        to position <span className="font-semibold text-ibm-yellow">{nextEntry == 194 ? "Crane" : `[ ${nextRow} , ${nextCol} ]`}</span>
+                        from position <span className="font-semibold text-ibm-yellow">{entry == 194 ? "Truck" : `[ ${currentRow} , ${currentCol} ]`}</span>{" "}
+                        to position <span className="font-semibold text-ibm-yellow">{nextEntry == 194 ? "Truck" : `[ ${nextRow} , ${nextCol} ]`}</span>
                     </p>
                     <h3 className="font-bold text-ibm-pink text-lg mt-2">Upcoming Instruction(s):</h3>
                     <ol className="list-decimal ml-4 pl-5 space-y-2">
@@ -54,8 +54,8 @@ const DisplayInstructions = ({ optimalSteps, currentStep, manifest, alignedList 
                             return (
                                 <li key={index} className="text-base">
                                     Move <span className="font-semibold text-ibm-blue">{newName !== "UNUSED" ? "Crane" : currName}</span> {" "}
-                                    from position <span className="font-semibold text-ibm-yellow">{currEntry == 194 ? "Crane" : `[ ${ currRow } , ${ currCol } ]`}</span>{" "}
-                                    to position <span className="font-semibold text-ibm-yellow">{newEntry == 194 ? "Crane" : `[ ${ newRow } , ${ newCol } ]`}</span>
+                                    from position <span className="font-semibold text-ibm-yellow">{currEntry == 194 ? "Truck" : `[ ${ currRow } , ${ currCol } ]`}</span>{" "}
+                                    to position <span className="font-semibold text-ibm-yellow">{newEntry == 194 ? "Truck" : `[ ${ newRow } , ${ newCol } ]`}</span>
                                 </li>
                             );
                         })}
