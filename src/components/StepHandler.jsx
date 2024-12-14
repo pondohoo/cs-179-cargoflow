@@ -95,82 +95,78 @@ const StepHandler = ({
   console.log("alignedList", alignedList);
 
   const nextStep = () => {
-    if (currentStep && currentStep[0] && currentStep[1]) {
-      const currentCol = currentStep[1][0][1];
-      const currentRow = currentStep[1][0][0];
-      const currentEntry = currentRow == 15 && currentCol == 39 ? 194 : (currentRow - 1) * 12 + (currentCol - 1);
-      const currentWeight = manifest[currentEntry].weight;
-      const currentName = manifest[currentEntry].name;
-      console.log(
-        "currentCol",
-        currentCol,
-        "currentRow",
-        currentRow,
-        "entry to update",
-        "currentWeight",
-        currentWeight,
-        "currentName",
-        currentName
-      );
-      const nextCol = currentStep[1][1][1];
-      const nextRow = currentStep[1][1][0];
-      const nextEntry = (nextRow - 1) * 12 + (nextCol - 1);
-      console.log("nextCol", nextCol, "nextRow", nextRow);
-      const newManifest = [...manifest];
-      console.log("newManifest", newManifest);
+    const currentCol = currentStep[1][0][1];
+    const currentRow = currentStep[1][0][0];
+    const currentEntry = currentRow == 15 && currentCol == 39 ? 194 : (currentRow - 1) * 12 + (currentCol - 1);
+    const currentWeight = manifest[currentEntry].weight;
+    const currentName = manifest[currentEntry].name;
+    console.log(
+      "currentCol",
+      currentCol,
+      "currentRow",
+      currentRow,
+      "entry to update",
+      "currentWeight",
+      currentWeight,
+      "currentName",
+      currentName
+    );
+    const nextCol = currentStep[1][1][1];
+    const nextRow = currentStep[1][1][0];
+    const nextEntry = (nextRow - 1) * 12 + (nextCol - 1);
+    console.log("nextCol", nextCol, "nextRow", nextRow);
+    const newManifest = [...manifest];
+    console.log("newManifest", newManifest);
 
 
-      // [truck, unused] [truck, ship], [ship, truck], [ship, ship], [ship, unused] (blocking)
+    // [truck, unused] [truck, ship], [ship, truck], [ship, ship], [ship, unused] (blocking)
 
-      // list: [load=1, unload=0, crane=-1, blocking/balancing=-2]
+    // list: [load=1, unload=0, crane=-1, blocking/balancing=-2]
 
-      // ONLY LOADS: [truck, unused](load) [ship, truck](crane) [truck, unused](load) 
-      // ONLY UNLOADS: [ship, truck](unload) [truck, ship](crane) [ship, truck](unload)
+    // ONLY LOADS: [truck, unused](load) [ship, truck](crane) [truck, unused](load) 
+    // ONLY UNLOADS: [ship, truck](unload) [truck, ship](crane) [ship, truck](unload)
 
-      // loadUnloadList:    [1, 0, 1, -1, 0, -2]
-      // containersToLoad:  [A, x, B,  x, x,  x]
+    // loadUnloadList:    [1, 0, 1, -1, 0, -2]
+    // containersToLoad:  [A, x, B,  x, x,  x]
 
-      if (loadUnloadOperationList[currentStep[0]] === 1) { // load (set to to containerstoload[0])      
-        addLogEntry(`"${alignedList[currentStep[0]]}" is onloaded.`);
-        setShowWeightPopup(true);
-        setPendingEntry({
-          nextEntry,
-          nextRow,
-          nextCol,
-          containerName: alignedList[currentStep[0]],
-        });
-        return;
-      } else if (loadUnloadOperationList[currentStep[0]] === 0) { // unload (set from to UNUSED)
-        addLogEntry(`"${currentName}" is offloaded.`);
-        newManifest[currentEntry] = {
-          ...newManifest[currentCol - currentRow],
-          name: "UNUSED",
-          weight: 0,
-          row: currentRow,
-          col: currentCol,
-        };
-      } else if (loadUnloadOperationList[currentStep[0]] !== -1) { // balance/blocking (swap)
-        addLogEntry(`"${currentName}" is moved from [ ${currentRow} , ${currentCol} ] to [ ${nextRow} , ${nextCol} ].`);
-        newManifest[currentEntry] = {
-          ...newManifest[currentCol - currentRow],
-          name: "UNUSED",
-          weight: 0,
-          row: currentRow,
-          col: currentCol,
-        };
-        newManifest[nextEntry] = {
-          ...newManifest[nextCol - nextRow],
-          name: currentName,
-          weight: currentWeight,
-          row: nextRow,
-          col: nextCol,
-        };
-      }
-      setManifest(newManifest);
-      moveToNextStep();
-    } else {
-      setDone(true);
+    if (loadUnloadOperationList[currentStep[0]] === 1) { // load (set to to containerstoload[0])      
+      addLogEntry(`"${alignedList[currentStep[0]]}" is onloaded.`);
+      setShowWeightPopup(true);
+      setPendingEntry({
+        nextEntry,
+        nextRow,
+        nextCol,
+        containerName: alignedList[currentStep[0]],
+      });
+      return;
+    } else if (loadUnloadOperationList[currentStep[0]] === 0) { // unload (set from to UNUSED)
+      addLogEntry(`"${currentName}" is offloaded.`);
+      newManifest[currentEntry] = {
+        ...newManifest[currentCol - currentRow],
+        name: "UNUSED",
+        weight: 0,
+        row: currentRow,
+        col: currentCol,
+      };
+    } else if (loadUnloadOperationList[currentStep[0]] !== -1) { // balance/blocking (swap)
+      addLogEntry(`"${currentName}" is moved from [ ${currentRow} , ${currentCol} ] to [ ${nextRow} , ${nextCol} ].`);
+      newManifest[currentEntry] = {
+        ...newManifest[currentCol - currentRow],
+        name: "UNUSED",
+        weight: 0,
+        row: currentRow,
+        col: currentCol,
+      };
+      newManifest[nextEntry] = {
+        ...newManifest[nextCol - nextRow],
+        name: currentName,
+        weight: currentWeight,
+        row: nextRow,
+        col: nextCol,
+      };
     }
+    setManifest(newManifest);
+    moveToNextStep();
   };
 
   const handleWeightSubmit = (event) => {
