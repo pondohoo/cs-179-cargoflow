@@ -46,7 +46,7 @@ const GridSquare = ({ entry, currentStep }) => {
 		>
 			{showPopup && (
 				<div
-					className="absolute z-10 bg-white text-black border border-gray-300 rounded-lg shadow-md p-3 text-sm"
+					className="absolute z-10 bg-white text-black border border-gray-300 rounded-lg shadow-md p-3 text-sm opacity-85"
 					style={{
 						transform: 'translateY(-120%)',
 						whiteSpace: 'nowrap',

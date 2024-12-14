@@ -127,37 +127,25 @@ function findBestCoordsToMoveBlockingContainer(
   );
 
   // Search for nearest available column with no unload containers.
-  let second_pass_best_row: number = -1;
-  let second_pass_best_col: number = Infinity;
   let l: number = col - 1;
   let r: number = col + 1;
-  let first_pass_best_row: number = -1;
-  let first_pass_best_col: number = -1;
+  let first_pass_best_row: number = 0;
+  let first_pass_best_col: number = 0;
   let minCost: number = Infinity;
 
   while (l >= 0 && r < 12) {
-    // Check left.
-    for (let i = 0; i < 8; i++) {
-      const currCell: ManifestEntry = grid[i][l];
-      if (
-        containersToUnloadSet.has(currCell.name) &&
-        second_pass_best_row == -1
-      ) {
-        while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][l].name == "UNUSED") {
-            second_pass_best_row = i;
-            second_pass_best_col = l;
-          }
-          i += 1;
+    // Check left.  
+    inner: for (let i = 0; i < 8; i++) { 
+      for (let j = 0; j < 8; j++) {
+        if (containersToUnloadSet.has(grid[j][l].name)) {
+          break inner;
         }
-
-        break;
       }
-
+      const currCell: ManifestEntry = grid[i][l];
       if (currCell.name == "UNUSED") {
         const currCost: number =
           Math.abs(row - i) + Math.abs(col - l);
-        if (currCost < minCost) {
+        if (currCost < minCost && (i == 0 || grid[i-1][l].name != "UNUSED")) {
           first_pass_best_row = i;
           first_pass_best_col = l;
           minCost = currCost;
@@ -169,24 +157,14 @@ function findBestCoordsToMoveBlockingContainer(
     l -= 1;
 
     // Check right.
-    for (let i = 0; i < 8; i++) {
-      const currCell: ManifestEntry = grid[i][r];
-      if (
-        containersToUnloadSet.has(currCell.name) &&
-        second_pass_best_row == -1
-      ) {
-        while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][r].name == "UNUSED") {
-            second_pass_best_row = i;
-            second_pass_best_col = r;
-          }
-          i += 1;
+    inner: for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        if (containersToUnloadSet.has(grid[j][r].name)) {
+          break inner;
         }
-
-        break;
       }
-
-      if (currCell.name == "UNUSED") {
+      const currCell: ManifestEntry = grid[i][r];
+      if (currCell.name == "UNUSED" && (i == 0 || grid[i-1][r].name != "UNUSED")) {
         const currCost: number =
           Math.abs(row - i) + Math.abs(col - r);
         if (currCost < minCost) {
@@ -200,75 +178,7 @@ function findBestCoordsToMoveBlockingContainer(
     r += 1;
   }
 
-  while (l >= 0) {
-    for (let i = 0; i < 8; i++) {
-      const currCell: ManifestEntry = grid[i][l];
-      if (
-        containersToUnloadSet.has(currCell.name) &&
-        second_pass_best_row == -1
-      ) {
-        while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][l].name == "UNUSED") {
-            second_pass_best_row = i;
-            second_pass_best_col = l;
-          }
-          i += 1;
-        }
-
-        break;
-      }
-
-      if (currCell.name == "UNUSED") {
-        const currCost: number =
-          Math.abs(row - i) + Math.abs(col - l);
-        if (currCost < minCost) {
-          first_pass_best_row = i;
-          first_pass_best_col = l;
-          minCost = currCost;
-          break;
-        }
-      }
-    }
-    l -= 1;
-  }
-
-  while (r < 12) {
-    for (let i = 0; i < 8; i++) {
-      const currCell: ManifestEntry = grid[i][r];
-      if (
-        containersToUnloadSet.has(currCell.name) &&
-        second_pass_best_row == -1
-      ) {
-        while (i < 8 && second_pass_best_row == -1) {
-          if (grid[i][r].name == "UNUSED") {
-            second_pass_best_row = i;
-            second_pass_best_col = r;
-          }
-          i += 1;
-        }
-
-        break;
-      }
-
-      if (currCell.name == "UNUSED") {
-        const currCost: number =
-          Math.abs(row - i) + Math.abs(col - r);
-        if (currCost < minCost) {
-          first_pass_best_row = i;
-          first_pass_best_col = r;
-          minCost = currCost;
-          break;
-        }
-      }
-    }
-    r += 1;
-  }
-
-  if (first_pass_best_row != -1 && first_pass_best_col != -1) {
-    return { row: first_pass_best_row, col: first_pass_best_col };
-  } else {
-    return { row: second_pass_best_row, col: second_pass_best_col };
-  }
+  return { row: first_pass_best_row, col: first_pass_best_col };
 }
 
 function findBestLoadCoords(
@@ -299,7 +209,7 @@ function load(
   col: number,
   name: string,
   originalGrid: ManifestEntry[][],
-  listOfMoves: number[][][]
+  listOfMoves: number[][][],
 ): [ManifestEntry[][], number[][][], number[]] {
   let updatedGrid: ManifestEntry[][] = JSON.parse(JSON.stringify(originalGrid));
   let moves: number[][][] = [];
@@ -315,6 +225,7 @@ function load(
   }
 
   // Move from truck cell (15, 39) to target cell.
+  
   operationList.push(1); // pure load
   moves.push([
     [15, 39],
@@ -353,8 +264,9 @@ function moveBlockingContainers(
 
     // Move arm to blocking container if it is not already there.
     if (
-      originalListOfMoves[originalListOfMoves.length - 1][1][0] != armRow ||
-      originalListOfMoves[originalListOfMoves.length - 1][1][1] != armCol
+      originalListOfMoves[originalListOfMoves.length - 1] &&
+      (originalListOfMoves[originalListOfMoves.length - 1][1][0] != armRow ||
+      originalListOfMoves[originalListOfMoves.length - 1][1][1] != armCol)
     ) {
       listOfMoves.push([
         [
