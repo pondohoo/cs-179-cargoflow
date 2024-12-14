@@ -179,6 +179,10 @@ const StepHandler = ({
       setErrorMessage("Container weight should not exceed 5 digits.");
       return;
     }
+    if (containerWeight <= 0) {
+      setErrorMessage("Container weight should be greater than 0.");
+      return;
+    }
     if (pendingEntry) {
       const { nextEntry, nextRow, nextCol, containerName } = pendingEntry;
       const newManifest = [...manifest];
