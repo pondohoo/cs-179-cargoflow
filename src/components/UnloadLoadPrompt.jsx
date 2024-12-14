@@ -110,7 +110,7 @@ const UnloadLoadPrompt = ({
 						>
 							Done
 						</button>
-						<div className="text-black self-center">{message}</div>
+						<div className="text-red-500 text-sm ml-4 self-center">{message}</div>
 					</div>
 				</form>
 			</div>

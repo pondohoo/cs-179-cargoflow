@@ -10,8 +10,9 @@ const DownloadLogs = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const databaseName = "cargoflowDatabase";
-    const storeName = "cargoflowLogs" + new Date().getFullYear();
+    const currYear = new Date().getFullYear();
+    const databaseName = "cargoflowDatabase" + currYear;
+    const storeName = "cargoflowLogs" + currYear;
     const dbRequest = indexedDB.open(databaseName, 1);
 
     dbRequest.onupgradeneeded = (event) => {
