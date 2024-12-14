@@ -45,48 +45,71 @@ const Submission = () => {
 			<h2 className="text-xl font-semibold mb-2">Project Files</h2>
 			<ol className="list-decimal list-inside mb-4 space-y-2">
 				<li>
-					<strong>CargoMovers.pdf</strong> - Evidence of our efforts to plan our
-					elicitation of requirements from Mr. Keogh, and any notes taken during
-					the elicitation.
+					<a
+						href="https://drive.google.com/file/d/1JL_BzXRfGbNrWAonA-HwpFXcyRX3kEVN/view?usp=sharing"
+						className="text-blue-600 underline"
+					>
+						<strong>CargoFlow.pdf</strong>
+					</a>{" "}
+					- Evidence of our efforts to plan our elicitation of requirements from
+					Mr. Keogh, and any notes taken during the elicitation.
 				</li>
-				<li>
+				<li className="text-red-500">
 					<a
 						href="https://drive.google.com/file/d/1FOM86qgRk5hVelKeKrLsziqeBVaV9P2Y/view?usp=sharing"
 						className="text-blue-600 underline"
-					><strong>CargoFlowProjectPitchORIGINAL.pdf</strong></a> - Our original
-					pitch to Mr. Keogh, delivered on March 17th, 2023, at 10:00 AM.
+					>
+						<strong>CargoFlowFall2024_Attempt1.pdf</strong>
+					</a>{" "}
+					- Our original pitch to Mr. Keogh, delivered on October 13th, 2024, at
+					9:00 AM.
 				</li>
 				<li>
-					<strong>CargoMoversProjectPitchCORRECTED.pdf</strong> - A new version
-					of the pitch with all corrections, amendments, and deletions suggested
-					by Mr. Keogh (and/or Dr. Keogh).
+					<a
+						href="https://drive.google.com/file/d/1SPw5EXKlnAvd49c6xUQBVhDrRMIbLWqr/view?usp=sharing"
+						className="text-blue-600 underline"
+					>
+						<strong>CargoFlowFall2024_Attempt1_Revised.pdf</strong>
+					</a>{" "}
+					- A new version of the pitch with all corrections, amendments, and
+					deletions suggested by Mr. Keogh (and/or Dr. Keogh).
 				</li>
 				<li>
-					<strong>CargoMoversDesign.pdf</strong> - Evidence of our efforts to
-					design our software.
+					<a
+						href="https://drive.google.com/file/d/1ohQOhnSiVRi2QzfydBgoBBgXHT3IdppM/view?usp=sharing"
+						className="text-blue-600 underline"
+					>
+						<strong>CargoFlowDesign.pdf</strong>
+					</a>{" "}
+					- Evidence of our efforts to design our software.
 				</li>
 				<li>
-					<strong>CargoMoversTesting.pdf</strong> - Evidence of our efforts to
-					test our software.
+					<a
+						href="https://drive.google.com/file/d/14U0_TQGhIc7SjbvGvmhC7iMYPIp1VlZo/view?usp=sharing"
+						className="text-blue-600 underline"
+					>
+						<strong>CargoFlowTesting.pdf</strong>
+					</a>{" "}
+					- Evidence of our efforts to test our software.
 				</li>
 				<li>
 					This URL:{" "}
 					<a
-						href="https://github.com/CargoMovers"
+						href="https://github.com/pondohoo/cs-179-cargoflow"
 						className="text-blue-600 underline"
 					>
-						github.com/CargoMovers
+						github.com/pondohoo/cs-179-cargoflow
 					</a>{" "}
 					- Points to a GitHub repository of our code.
 				</li>
-				<li>
+				<li className="text-red-500">
 					This{" "}
 					<a href="#" className="text-blue-600 underline">
 						YouTube video
 					</a>{" "}
 					- Shows our software solving one balance and one transfer test case.
 				</li>
-				<li>
+				<li className="text-red-500">
 					<strong>KeoghsPort2024.txt</strong> - Log created by our software
 					during the making of the YouTube video.
 				</li>
@@ -94,36 +117,15 @@ const Submission = () => {
 
 			<h2 className="text-xl font-semibold mb-2">Limitations</h2>
 			<ul className="list-disc list-inside mb-4 space-y-2">
-				<li>We did not implement “recovery from a power outage”.</li>
 				<li>
-					We did not implement checks for the container name, so a naïve user
-					might type in “NAN” as a container name and we would accept it.
-				</li>
-				<li>
-					We did not implement duplicate name substitution. Duplicate named
-					containers may lead to unexpected results.
-				</li>
-				<li>
-					If there are more than 30 containers to be offloaded, our program may
-					hang or crash (but this never happens for fewer than 30 containers).
-				</li>
-			</ul>
-
-			<h2 className="text-xl font-semibold mb-2">Optional Information</h2>
-			<ul className="list-disc list-inside space-y-2">
-				<li>Additional items for grading the project.</li>
-				<li>
-					Acknowledgments: We asked advice from Dr. Smith about heuristics,
-					watched a{" "}
-					<a href="#" className="text-blue-600 underline">
-						YouTube video
-					</a>{" "}
-					about user interface design, and referred to the book
-					<em>
-						Simply Put!: Helping Stakeholders Discover and Define Requirements
-						for IT Projects
-					</em>{" "}
-					by Thomas Hathaway.
+					<li>
+						The website&#39;s storage capacity is limited, and running a complex
+						A*&#10;search for a certain amount of time tends to exceed it,
+						causing the&#10;function to pause and stop running. To address this,
+						we reduced the&#10;time limit from 15 minutes to 5 minutes. While
+						this change prevents&#10;the website from pausing, it also results
+						in a potential less optimal&#10;output.
+					</li>
 				</li>
 			</ul>
 		</div>
