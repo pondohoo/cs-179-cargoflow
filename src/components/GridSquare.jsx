@@ -14,20 +14,14 @@ const GridSquare = ({ entry, currentStep }) => {
 		setShowPopup(false);
 	};
 	const getColor = () => {
-		if (currentStep && entry.row > 12 || entry.col > 36) {
-			 {
-				
-			}
-		}
-
 		if (
-			currentStep &&
+			currentStep && currentStep[1] &&
 			currentStep[1][0][0] === entry.row &&
 			currentStep[1][0][1] === entry.col
 		) {
 			return "bg-ibm-orange";
 		} else if(
-			currentStep &&
+			currentStep && currentStep[1] &&
 			currentStep[1][1][0] === entry.row &&
 			currentStep[1][1][1] === entry.col
 		) {

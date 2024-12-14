@@ -1,7 +1,7 @@
 const DisplayInstructions = ({ optimalSteps, currentStep, manifest, alignedList }) => {
     console.log("DisplayInstructions alignedList", alignedList);
     let currentCol, currentRow, entry, name, nextCol, nextRow, nextEntry, nextName;
-    if (currentStep) {
+    if (currentStep && currentStep[1] && currentStep[0]) {
         currentCol = currentStep[1][0][1];
         currentRow = currentStep[1][0][0];
         entry = currentRow == 15 && currentCol == 39 ? 194 : (currentRow - 1) * 12 + (currentCol - 1);
@@ -25,7 +25,7 @@ const DisplayInstructions = ({ optimalSteps, currentStep, manifest, alignedList 
 
     return (
         <div>
-            {currentStep && (
+            {currentStep && currentStep[1] && currentStep[0] (
                 <div className="bg-ibm-gray text-white overflow-y-auto max-h-48 px-4 py-2 rounded-md shadow-lg">
                     <h3 className="font-bold text-ibm-green text-lg">Current Instruction:</h3>
                     <p className="ml-4 text-base">
